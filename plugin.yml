@@ -1,0 +1,16 @@
+name: DeathChest
+main: de.tobiyas.deathchest.DeathChest
+version: 1.0
+website: http://
+author: Tobiyas
+
+
+description: >
+             Fills a chest with your stuff, if you die.
+commands:
+  killself:
+    description: fsafsaf
+    aliases: []
+    usage: |
+           /<command> 
+

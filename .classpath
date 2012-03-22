@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="G:/Dropbox/Minecraft Backup/craftbukkit.jar"/>
+	<classpathentry kind="lib" path="G:/Dropbox/Minecraft Backup/plugins/Vault.jar"/>
+	<classpathentry kind="lib" path="G:/Dropbox/Minecraft Backup/plugins/WorldEdit.jar"/>
+	<classpathentry kind="lib" path="G:/Dropbox/Minecraft Backup/plugins/WorldGuard.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
