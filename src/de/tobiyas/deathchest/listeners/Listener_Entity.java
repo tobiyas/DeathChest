@@ -10,6 +10,7 @@ package de.tobiyas.deathchest.listeners;
 
 import java.util.LinkedList;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,9 +27,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+
 import de.tobiyas.deathchest.DeathChest;
 
 import de.tobiyas.deathchest.chestpositions.ChestContainer;
+import de.tobiyas.deathchest.permissions.PermissionNode;
 
 
 public class Listener_Entity  implements Listener{
@@ -41,35 +45,50 @@ public class Listener_Entity  implements Listener{
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event){
 		Player player = (Player) event.getEntity();
-		if(!plugin.getPermissionsManager().CheckPermissionsSilent(player, "saveafterdeath")) return;
+		Location location = player.getLocation();
+		
+		LinkedList<ItemStack> toRemove = saveToDeathChest(player);
+		event.getDrops().removeAll(toRemove);
+		
+		if(event.getDrops().isEmpty()) return;
+		
+		toRemove = placeChestOnLocation(location, player);
+		event.getDrops().removeAll(toRemove);
+			
+		if(event.getDrops().size() > 0 && plugin.getChestContainer().checkPlayerHasChest(location.getWorld(), player)) 
+			player.sendMessage(ChatColor.RED + "Your total inventory did not fit in the box. The rest items were dropped at your death location.");
+	}
+		
+	
+	private LinkedList<ItemStack> saveToDeathChest(Player player){
+		LinkedList<ItemStack> returnList = new LinkedList<ItemStack>();
+		
+		if(!plugin.getPermissionsManager().CheckPermissionsSilent(player, PermissionNode.permitDeathChest)) return returnList;
 
 		ChestContainer container = plugin.getChestContainer();
-		if(!container.checkPlayerHasChest(player, player.getWorld())){
+		if(!container.checkPlayerHasChest(player.getWorld(), player)){
 			player.sendMessage(ChatColor.RED + "You don't have a Chest set. Sorry for you. :(");
-			return;
+			return returnList;
 		}
 			
 		PlayerInventory inv = player.getInventory();
 		Location chestLocation = container.getChestOfPlayer(player.getWorld(), player);					
-		Block chestBlock = player.getWorld().getBlockAt(chestLocation);
+		Block chestBlock = chestLocation.getBlock();
 	
 		if(chestBlock.getType() != Material.CHEST){
 			player.sendMessage(ChatColor.RED + "No chest found at Position: " + 
 					"X: " + chestLocation.getBlockX() + 
 					"Y: " + chestLocation.getBlockY() + 
 					"Z: " + chestLocation.getBlockZ());
-			return;
+			return returnList;
 		}
 		
 		LinkedList<ItemStack> toRemove = copyInventoryToChest(inv, (Chest)chestBlock.getState());
-		event.getDrops().removeAll(toRemove);
-		
-		player.sendMessage(ChatColor.GREEN + "Your inventory was stored in your DeathChest on world: " + player.getWorld().getName() + ".");
-		if(event.getDrops().size() > 0) player.sendMessage("Your total inventory did not fit in the box. The rest items were dropped at your death location.");
+		player.sendMessage(ChatColor.GREEN + "Your inventory was stored in your DeathChest on world: " + chestLocation.getWorld().getName() + ".");
+		return toRemove;
 	}
 	
 	private LinkedList<ItemStack> copyInventoryToChest(PlayerInventory inventory, Chest chest){
-		
 		Inventory chestInv = chest.getInventory();
 		Inventory playerInv = inventory;
 		
@@ -96,6 +115,32 @@ public class Listener_Entity  implements Listener{
 			chestInv.addItem(item);
 			toRemove.add(item);
 		}
+		return toRemove;
+	}
+	
+	private LinkedList<ItemStack> placeChestOnLocation(Location location, Player player){
+		LinkedList<ItemStack> emptyReturnList = new LinkedList<ItemStack>();
+		
+		if(!plugin.getPermissionsManager().CheckPermissions(player, PermissionNode.spawnChest)) return emptyReturnList;
+		if(plugin.getConfigManager().checkForWorldGuardCanBuild()){
+			try{
+				WorldGuardPlugin wgPlugin = (WorldGuardPlugin) Bukkit.getPluginManager().getPlugin("WorldGuard");
+				if(!wgPlugin.canBuild(player, location)) return emptyReturnList;
+			}catch(Exception e){
+				plugin.log("Error at check of WorldGuard.");
+			}
+		}
+		
+		if(plugin.getConfigManager().checkIfChestInInv()){
+			if(!player.getInventory().contains(Material.CHEST)) return emptyReturnList;
+			player.getInventory().removeItem(new ItemStack(Material.CHEST, 1));
+		}
+		
+		location.getBlock().setType(Material.CHEST);
+		LinkedList<ItemStack> toRemove = copyInventoryToChest(player.getInventory(), (Chest)location.getBlock().getState());
+		
+		
+		player.sendMessage(ChatColor.GREEN + "Your Inventory has been saved to a Chest on your Death-Position.");
 		return toRemove;
 	}
 

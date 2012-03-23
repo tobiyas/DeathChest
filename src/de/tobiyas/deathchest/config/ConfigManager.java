@@ -1,14 +1,14 @@
 package de.tobiyas.deathchest.config;
 
 
-import org.bukkit.configuration.file.FileConfiguration;
-
 import de.tobiyas.deathchest.DeathChest;
 
 public class ConfigManager {
 
 	private DeathChest plugin;
-	private String config_testnode;
+	
+	private boolean worldGuardEnable;
+	private boolean chestInInv;
 	
 	public ConfigManager(){
 		plugin = DeathChest.getPlugin();
@@ -16,21 +16,31 @@ public class ConfigManager {
 		reloadConfiguration();
 	}
 	
-	private void reloadConfiguration(){
-		FileConfiguration cfg = plugin.getConfig();
-		
-		config_testnode = cfg.getString("testnode", "test");
-	}
-	
 	private void setupConfiguration(){
-		FileConfiguration cfg = plugin.getConfig();
+		plugin.getConfig().addDefault("plugin.worldGuardEnable", true);
+		plugin.getConfig().addDefault("plugin.checkChestInInventory", true);
 		
-		cfg.addDefault("testnode", "test");
-		
+		plugin.getConfig().options().copyDefaults(true);
 		plugin.saveConfig();
 	}
 	
-	public String getConfig_testnode(){
-		return config_testnode;
+	private void reloadConfiguration(){
+		plugin.reloadConfig();
+		
+		worldGuardEnable = plugin.getConfig().getBoolean("plugin.worldGuardEnable", true);
+		chestInInv = plugin.getConfig().getBoolean("plugin.checkChestInInventory", true);
+		
+	}
+	
+	public void reloadConfig(){
+		reloadConfiguration();
+	}
+	
+	public boolean checkForWorldGuardCanBuild(){
+		return worldGuardEnable;
+	}
+	
+	public boolean checkIfChestInInv(){
+		return chestInInv;
 	}
 }

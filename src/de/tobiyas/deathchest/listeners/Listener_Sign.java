@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 
 import de.tobiyas.deathchest.DeathChest;
+import de.tobiyas.deathchest.permissions.PermissionNode;
 
 public class Listener_Sign implements Listener {
 
@@ -28,7 +29,7 @@ public class Listener_Sign implements Listener {
 		World world = player.getWorld();
 		
 		if(!(lines[1].toLowerCase().equals("[deathchest]"))) return;
-		if(!plugin.getPermissionsManager().CheckPermissions(player, "createdeathchest")) return;
+		if(!plugin.getPermissionsManager().CheckPermissions(player, PermissionNode.createDeathChest)) return;
 		
 		Location location = new Location(world, signPosition.getX(), signPosition.getY() - 1, signPosition.getZ());
 		
@@ -37,7 +38,7 @@ public class Listener_Sign implements Listener {
 			return;
 		}
 		
-		plugin.getChestContainer().addChestToPlayer(world, player, location);
+		plugin.getChestContainer().addChestToPlayer(location, player);
 		
 		event.setLine(0, player.getName());
 		event.setLine(1, "[DeathChest]");
@@ -45,5 +46,17 @@ public class Listener_Sign implements Listener {
 		event.setLine(3, "");
 		
 		player.sendMessage(ChatColor.GREEN + "DeathChest created for world: " + world.getName());
+	}
+	
+	
+	@EventHandler
+	public void signBreak(BlockBreakEvent event){
+		if(!(event.getBlock().getType() == Material.WALL_SIGN)) return;
+		
+		plugin.log("broke");
+		Location location = event.getBlock().getLocation();
+		location.setY(location.getY() - 1);
+		
+		plugin.getChestContainer().removeFromPosition(location);
 	}
 }

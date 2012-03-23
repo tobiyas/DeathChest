@@ -13,4 +13,8 @@ commands:
     aliases: []
     usage: |
            /<command> 
-
+  dcreload:
+    description: reloads DeathChestConfig
+    aliases: []
+    usage: |
+           /dcreload
