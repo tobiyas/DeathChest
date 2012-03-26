@@ -27,6 +27,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import com.griefcraft.lwc.LWCPlugin;
+import com.griefcraft.model.Protection;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 import de.tobiyas.deathchest.DeathChest;
@@ -44,31 +46,40 @@ public class Listener_Entity  implements Listener{
 
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event){
+		boolean filledDeathChest = false;
+		boolean filledSpawnChest = false;
+		
+		if(event.getDrops().isEmpty()) return;
 		Player player = (Player) event.getEntity();
 		Location location = player.getLocation();
 		
 		LinkedList<ItemStack> toRemove = saveToDeathChest(player);
+		filledDeathChest = !toRemove.isEmpty();
 		event.getDrops().removeAll(toRemove);
 		
 		if(event.getDrops().isEmpty()) return;
 		
-		toRemove = placeChestOnLocation(location, player);
-		event.getDrops().removeAll(toRemove);
+		if(!filledDeathChest){
+			toRemove = placeSpawnChestOnLocation(location, player);
+			filledSpawnChest = !toRemove.isEmpty();
+			event.getDrops().removeAll(toRemove);
+		}
 			
-		if(event.getDrops().size() > 0 && plugin.getChestContainer().checkPlayerHasChest(location.getWorld(), player)) 
+		if(event.getDrops().size() > 0 && filledDeathChest)
 			player.sendMessage(ChatColor.RED + "Your total inventory did not fit in the box. The rest items were dropped at your death location.");
+		if(!filledDeathChest && !filledSpawnChest && plugin.getPermissionsManager().CheckPermissionsSilent(player, PermissionNode.saveToDeathChest))
+			player.sendMessage(ChatColor.RED + "You don't have a Chest set yet. Sorry for you. :(");
 	}
 		
 	
 	private LinkedList<ItemStack> saveToDeathChest(Player player){
-		LinkedList<ItemStack> returnList = new LinkedList<ItemStack>();
+		LinkedList<ItemStack> emptyReturnList = new LinkedList<ItemStack>();
 		
-		if(!plugin.getPermissionsManager().CheckPermissionsSilent(player, PermissionNode.permitDeathChest)) return returnList;
+		if(!plugin.getPermissionsManager().CheckPermissionsSilent(player, PermissionNode.saveToDeathChest)) return emptyReturnList;
 
 		ChestContainer container = plugin.getChestContainer();
 		if(!container.checkPlayerHasChest(player.getWorld(), player)){
-			player.sendMessage(ChatColor.RED + "You don't have a Chest set. Sorry for you. :(");
-			return returnList;
+			return emptyReturnList;
 		}
 			
 		PlayerInventory inv = player.getInventory();
@@ -80,7 +91,7 @@ public class Listener_Entity  implements Listener{
 					"X: " + chestLocation.getBlockX() + 
 					"Y: " + chestLocation.getBlockY() + 
 					"Z: " + chestLocation.getBlockZ());
-			return returnList;
+			return emptyReturnList;
 		}
 		
 		LinkedList<ItemStack> toRemove = copyInventoryToChest(inv, (Chest)chestBlock.getState());
@@ -118,16 +129,16 @@ public class Listener_Entity  implements Listener{
 		return toRemove;
 	}
 	
-	private LinkedList<ItemStack> placeChestOnLocation(Location location, Player player){
+	private LinkedList<ItemStack> placeSpawnChestOnLocation(Location location, Player player){
 		LinkedList<ItemStack> emptyReturnList = new LinkedList<ItemStack>();
 		
-		if(!plugin.getPermissionsManager().CheckPermissions(player, PermissionNode.spawnChest)) return emptyReturnList;
+		if(!plugin.getPermissionsManager().CheckPermissionsSilent(player, PermissionNode.spawnChest)) return emptyReturnList;
 		if(plugin.getConfigManager().checkForWorldGuardCanBuild()){
 			try{
 				WorldGuardPlugin wgPlugin = (WorldGuardPlugin) Bukkit.getPluginManager().getPlugin("WorldGuard");
 				if(!wgPlugin.canBuild(player, location)) return emptyReturnList;
 			}catch(Exception e){
-				plugin.log("Error at check of WorldGuard.");
+				plugin.log("Error at check of WorldGuard. WorldGuard not Active.");
 			}
 		}
 		
@@ -139,9 +150,31 @@ public class Listener_Entity  implements Listener{
 		location.getBlock().setType(Material.CHEST);
 		LinkedList<ItemStack> toRemove = copyInventoryToChest(player.getInventory(), (Chest)location.getBlock().getState());
 		
+		if(!toRemove.isEmpty()) protectWithLWC(location, player);
+		
 		
 		player.sendMessage(ChatColor.GREEN + "Your Inventory has been saved to a Chest on your Death-Position.");
 		return toRemove;
+	}
+	
+	private void protectWithLWC(Location location, Player player){
+		if(plugin.getConfigManager().checkSpawnChestLWC()){
+			try{
+				LWCPlugin LWC = (LWCPlugin) Bukkit.getPluginManager().getPlugin("LWC");
+				
+				String world = player.getWorld().getName();
+				int blockID = location.getBlock().getTypeId();
+				int x = location.getBlockX();
+				int y = location.getBlockY();
+				int z = location.getBlockZ();
+				
+				Protection protection = LWC.getLWC().getPhysicalDatabase().registerProtection(blockID, Protection.Type.PRIVATE, world, player.getName(), "", x, y, z);
+				protection.save();
+				
+			}catch(Exception e){
+				plugin.log("LWC not Found. Disable LWC Config options for SpawnChests!");
+			}
+		}
 	}
 
 

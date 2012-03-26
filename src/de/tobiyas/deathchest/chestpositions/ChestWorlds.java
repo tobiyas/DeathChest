@@ -153,7 +153,6 @@ public class ChestWorlds implements ChestContainer{
 			if(!checkPlayerHasChest(location.getWorld(), player)){
 				ChestContainer container = new ChestPosition(packageConfig, packageName, player, location);
 				packageContainer.add(container);
-				plugin.log("New Creation.");
 				return true;
 			}else{
 				changePosition(location, player);
@@ -200,19 +199,23 @@ public class ChestWorlds implements ChestContainer{
 
 
 	@Override
-	public boolean removeFromPosition(Location location) {
+	public ChestContainer removeFromPosition(Location location) {
 		World world = location.getWorld();
 		if(!isControler)
 			if(!worldList.contains(world)) 
-				return false;
+				return null;
 		
 		for(ChestContainer container : packageContainer){
-			if(container.removeFromPosition(location)){
-				if(!isControler) packageContainer.remove(container);
-				return true;
+			ChestContainer possibleContainer = container.removeFromPosition(location);
+			if(possibleContainer != null){
+				if(!isControler) {
+					packageContainer.remove(container);
+					return container;
+				}
+				return possibleContainer;
 			}
 		}
-	return false;
+	return null;
 	}
 
 }

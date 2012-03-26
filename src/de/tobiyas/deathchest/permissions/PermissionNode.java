@@ -2,8 +2,8 @@ package de.tobiyas.deathchest.permissions;
 
 public class PermissionNode {
 
-	public static String permitDeathChest = "createdeathchest";
-	public static String createDeathChest = "saveafterdeath";
-	public static String spawnChest = "spawnchest";
-	public static String reloadConfig = "reloadconfig";
+	public static String createDeathChest = "signchest.create";
+	public static String saveToDeathChest = "signchest.saveto";
+	public static String spawnChest = "spawnchest.spawn";
+	public static String reloadConfig = "commands.reload";
 }

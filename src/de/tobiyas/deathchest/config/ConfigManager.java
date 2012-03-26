@@ -9,6 +9,8 @@ public class ConfigManager {
 	
 	private boolean worldGuardEnable;
 	private boolean chestInInv;
+	private boolean createSpawnChestWithLWC;
+	private boolean checkDeathChestWithLWC;
 	
 	public ConfigManager(){
 		plugin = DeathChest.getPlugin();
@@ -17,8 +19,10 @@ public class ConfigManager {
 	}
 	
 	private void setupConfiguration(){
-		plugin.getConfig().addDefault("plugin.worldGuardEnable", true);
-		plugin.getConfig().addDefault("plugin.checkChestInInventory", true);
+		plugin.getConfig().addDefault("plugin.SpawnChest.worldGuardEnable", true);
+		plugin.getConfig().addDefault("plugin.SpawnChest.checkChestInInventory", true);
+		plugin.getConfig().addDefault("plugin.SpawnChest.protectWithLWC", true);
+		plugin.getConfig().addDefault("plugin.DeathChest.checkCreationWithLWC", false);
 		
 		plugin.getConfig().options().copyDefaults(true);
 		plugin.saveConfig();
@@ -27,8 +31,10 @@ public class ConfigManager {
 	private void reloadConfiguration(){
 		plugin.reloadConfig();
 		
-		worldGuardEnable = plugin.getConfig().getBoolean("plugin.worldGuardEnable", true);
-		chestInInv = plugin.getConfig().getBoolean("plugin.checkChestInInventory", true);
+		worldGuardEnable = plugin.getConfig().getBoolean("plugin.SpawnChest.worldGuardEnable", true);
+		chestInInv = plugin.getConfig().getBoolean("plugin.SpawnChest.checkChestInInventory", true);
+		createSpawnChestWithLWC = plugin.getConfig().getBoolean("plugin.SpawnChest.protectWithLWC", true);
+		checkDeathChestWithLWC = plugin.getConfig().getBoolean("plugin.DeathChest.checkCreationWithLWC", false);
 		
 	}
 	
@@ -42,5 +48,13 @@ public class ConfigManager {
 	
 	public boolean checkIfChestInInv(){
 		return chestInInv;
+	}
+	
+	public boolean checkSpawnChestLWC(){
+		return createSpawnChestWithLWC;
+	}
+	
+	public boolean checkDeathChestWithLWC(){
+		return checkDeathChestWithLWC;
 	}
 }

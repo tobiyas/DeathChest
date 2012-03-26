@@ -14,6 +14,6 @@ public interface ChestContainer {
 	
 	public boolean hasWorld(World world);
 	
-	public boolean removeFromPosition(Location location);
+	public ChestContainer removeFromPosition(Location location);
 	
 }

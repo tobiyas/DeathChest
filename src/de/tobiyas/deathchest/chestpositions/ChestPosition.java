@@ -6,7 +6,6 @@ import java.io.IOException;
 import de.tobiyas.deathchest.DeathChest;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -115,10 +114,10 @@ public class ChestPosition implements ChestContainer{
 	}
 
 	@Override
-	public boolean removeFromPosition(Location location) {
+	public ChestContainer removeFromPosition(Location location) {
 		World world = location.getWorld();
-		if(!world.equals(this.world)) return false;
-		if(!location.equals(this.location)) return false;
+		if(!world.equals(this.world)) return null;
+		if(!location.equals(this.location)) return null;
 		
 		config.set(packageName + "." + player, null);
 		try {
@@ -126,9 +125,10 @@ public class ChestPosition implements ChestContainer{
 		} catch (IOException e) {
 		}
 		
-		Player tempPlayer = Bukkit.getPlayer(player);
-		if(tempPlayer != null) tempPlayer.sendMessage(ChatColor.RED + "Your DeathChest on World: " + world.getName() + " has been destroyed!");
-		
-		return true;
+		return this;
+	}
+	
+	public String getPlayerName(){
+		return player;
 	}
 }

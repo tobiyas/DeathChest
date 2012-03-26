@@ -15,7 +15,6 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import de.tobiyas.deathchest.chestpositions.ChestContainer;
 import de.tobiyas.deathchest.chestpositions.ChestWorlds;
 import de.tobiyas.deathchest.commands.CommandExecuter_DCReload;
-import de.tobiyas.deathchest.commands.CommandExecutor_Testcommand;
 import de.tobiyas.deathchest.config.ConfigManager;
 
 import de.tobiyas.deathchest.listeners.Listener_Entity;
@@ -67,7 +66,7 @@ public class DeathChest extends JavaPlugin{
 	}
 	
 	private void addCommands(){
-		getCommand("killself").setExecutor(new CommandExecutor_Testcommand(this));
+		//getCommand("killself").setExecutor(new CommandExecutor_Testcommand(this));
 		getCommand("dcreload").setExecutor(new CommandExecuter_DCReload(this));
 	}
 	

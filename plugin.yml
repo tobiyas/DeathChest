@@ -3,16 +3,19 @@ main: de.tobiyas.deathchest.DeathChest
 version: 1.0
 website: http://
 author: Tobiyas
+depend: [Vault]
+softdepend: [WorldGuard, LWC]
 
 
 description: >
              Fills a chest with your stuff, if you die.
 commands:
-  killself:
-    description: fsafsaf
-    aliases: []
-    usage: |
-           /<command> 
+# only for testing!
+#  killself:
+#    description: fsafsaf
+#    aliases: []
+#    usage: |
+#           /<command> 
   dcreload:
     description: reloads DeathChestConfig
     aliases: []

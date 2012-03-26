@@ -13,6 +13,8 @@ import de.tobiyas.deathchest.DeathChest;
 
 
 public class PermissionsManager {
+	
+	private final String pluginNamePerm = "deathchest.";
 
 	private static Permission permission = null;
 	private DeathChest plugin;
@@ -38,7 +40,7 @@ public class PermissionsManager {
 	public boolean CheckPermissions(Player player, String permissionNode){
 		if(permissionNode == null) return true;
 		if(!permissionSystemFound()) return true;
-		boolean hasPerms = permission.has(player, "deathchest." + permissionNode);
+		boolean hasPerms = permission.has(player, pluginNamePerm + permissionNode);
 		if(!hasPerms) player.sendMessage(ChatColor.RED + "You don't have Permissions.");
 		return hasPerms;
 	}
@@ -46,7 +48,7 @@ public class PermissionsManager {
 	public boolean CheckPermissionsSilent(Player player, String permissionNode){
 		if(permissionNode == null) return true;
 		if(!permissionSystemFound()) return true;
-		return permission.has(player, "regionclaimer." + permissionNode);
+		return permission.has(player, pluginNamePerm + permissionNode);
 	}
 	
 	public boolean CheckPermissions(CommandSender sender, String permissionNode){
