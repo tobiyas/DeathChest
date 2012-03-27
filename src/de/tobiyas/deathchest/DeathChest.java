@@ -95,4 +95,8 @@ public class DeathChest extends JavaPlugin{
 		return cContainer;
 	}
 
+	public void reloadChestContainer() {
+		cContainer = ChestWorlds.createALLPackages();
+	}
+
 }

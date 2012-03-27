@@ -32,6 +32,7 @@ import com.griefcraft.model.Protection;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 import de.tobiyas.deathchest.DeathChest;
+import de.tobiyas.deathchest.chestpositions.ChestPosition;
 
 import de.tobiyas.deathchest.chestpositions.ChestContainer;
 import de.tobiyas.deathchest.permissions.PermissionNode;
@@ -83,7 +84,11 @@ public class Listener_Entity  implements Listener{
 		}
 			
 		PlayerInventory inv = player.getInventory();
-		Location chestLocation = container.getChestOfPlayer(player.getWorld(), player);					
+		ChestContainer chestContainer = container.getChestOfPlayer(player.getWorld(), player);
+		
+		ChestPosition chestPos = (ChestPosition) chestContainer;
+		Location chestLocation = chestPos.getLocation();
+		
 		Block chestBlock = chestLocation.getBlock();
 	
 		if(chestBlock.getType() != Material.CHEST){

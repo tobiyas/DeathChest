@@ -7,6 +7,7 @@ import de.tobiyas.deathchest.DeathChest;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -24,7 +25,8 @@ public class ChestPosition implements ChestContainer{
 	private double posX;
 	private double posY;
 	private double posZ;
-	private Location location;
+	private Location chestLocation;
+	private Location signLocation;
 	
 	private String savePath;
 	
@@ -56,7 +58,8 @@ public class ChestPosition implements ChestContainer{
 		world = Bukkit.getWorld(worldName);
 		if(world == null) throw new IOException("world");
 		
-		location = new Location(world, posX, posY, posZ);
+		chestLocation = new Location(world, posX, posY, posZ);
+		signLocation = new Location(world, posX, posY + 1, posZ);
 		//plugin.log("player: " + player + " world: " + world.getName() + " posX: " + posX + " posY: " + posY + " posZ: " + posZ);
 	}
 	
@@ -71,9 +74,9 @@ public class ChestPosition implements ChestContainer{
 
 
 	@Override
-	public Location getChestOfPlayer(World world, Player player) {
+	public ChestContainer getChestOfPlayer(World world, Player player) {
 		if(!checkPlayerHasChest(world, player)) return null;
-		return location;
+		return this;
 	}
 
 
@@ -90,7 +93,8 @@ public class ChestPosition implements ChestContainer{
 		this.posX = location.getX();
 		this.posY = location.getY();
 		this.posZ = location.getZ();
-		this.location = location;
+		this.chestLocation = location;
+		this.signLocation = new Location(world, posX, posY + 1, posZ);
 		
 		String playerPrefix = packageName + "." + player.getName();
 		
@@ -117,7 +121,7 @@ public class ChestPosition implements ChestContainer{
 	public ChestContainer removeFromPosition(Location location) {
 		World world = location.getWorld();
 		if(!world.equals(this.world)) return null;
-		if(!location.equals(this.location)) return null;
+		if(!location.equals(this.chestLocation)) return null;
 		
 		config.set(packageName + "." + player, null);
 		try {
@@ -131,4 +135,20 @@ public class ChestPosition implements ChestContainer{
 	public String getPlayerName(){
 		return player;
 	}
+	
+	public Location getLocation(){
+		return chestLocation;
+	}
+	
+	public void destroySelf(boolean lightning, boolean breakNaturaly){
+		if(!signLocation.getBlock().getType().equals(Material.WALL_SIGN)) return;
+		if(lightning) world.strikeLightningEffect(signLocation);
+		if(breakNaturaly) world.getBlockAt(signLocation).breakNaturally();
+	}
+
+	@Override //not used in this struct
+	public boolean worldSupported(World world) {
+		return true;
+	}
+	
 }

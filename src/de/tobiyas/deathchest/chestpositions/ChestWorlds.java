@@ -118,17 +118,17 @@ public class ChestWorlds implements ChestContainer{
 	}
 	
 	@Override
-	public Location getChestOfPlayer(World world, Player player) {
+	public ChestContainer getChestOfPlayer(World world, Player player) {
 		if(isControler){
 			for(ChestContainer container : packageContainer){
-				Location deathChestPosition = container.getChestOfPlayer(world, player);
+				ChestContainer deathChestPosition = container.getChestOfPlayer(world, player);
 				if(deathChestPosition != null) return deathChestPosition;
 			}
 			return null;
 		}else{
 			if(!worldList.contains(world)) return null;
 			for(ChestContainer container : packageContainer){
-				Location deathChestPosition = container.getChestOfPlayer(world, player);
+				ChestContainer deathChestPosition = container.getChestOfPlayer(world, player);
 				if(deathChestPosition != null) return deathChestPosition;
 			}
 			
@@ -216,6 +216,19 @@ public class ChestWorlds implements ChestContainer{
 			}
 		}
 	return null;
+	}
+
+
+	@Override
+	public boolean worldSupported(World world) {
+		if(isControler){
+			for(ChestContainer container : packageContainer){
+				if(container.worldSupported(world)) return true;
+			}
+		}else{
+			if(worldList.contains(world)) return true;
+		}
+		return false;
 	}
 
 }

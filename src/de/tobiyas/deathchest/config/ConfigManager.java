@@ -11,6 +11,7 @@ public class ConfigManager {
 	private boolean chestInInv;
 	private boolean createSpawnChestWithLWC;
 	private boolean checkDeathChestWithLWC;
+	private boolean useLightningForDeathChestSign;
 	
 	public ConfigManager(){
 		plugin = DeathChest.getPlugin();
@@ -22,7 +23,9 @@ public class ConfigManager {
 		plugin.getConfig().addDefault("plugin.SpawnChest.worldGuardEnable", true);
 		plugin.getConfig().addDefault("plugin.SpawnChest.checkChestInInventory", true);
 		plugin.getConfig().addDefault("plugin.SpawnChest.protectWithLWC", true);
+		
 		plugin.getConfig().addDefault("plugin.DeathChest.checkCreationWithLWC", false);
+		plugin.getConfig().addDefault("plugin.DeathChest.useLightningBreakDCSign", false);
 		
 		plugin.getConfig().options().copyDefaults(true);
 		plugin.saveConfig();
@@ -34,7 +37,9 @@ public class ConfigManager {
 		worldGuardEnable = plugin.getConfig().getBoolean("plugin.SpawnChest.worldGuardEnable", true);
 		chestInInv = plugin.getConfig().getBoolean("plugin.SpawnChest.checkChestInInventory", true);
 		createSpawnChestWithLWC = plugin.getConfig().getBoolean("plugin.SpawnChest.protectWithLWC", true);
+		
 		checkDeathChestWithLWC = plugin.getConfig().getBoolean("plugin.DeathChest.checkCreationWithLWC", false);
+		useLightningForDeathChestSign = plugin.getConfig().getBoolean("plugin.DeathChest.useLightningBreakDCSign", false);
 		
 	}
 	
@@ -56,5 +61,9 @@ public class ConfigManager {
 	
 	public boolean checkDeathChestWithLWC(){
 		return checkDeathChestWithLWC;
+	}
+
+	public boolean useLightningForDeathChest() {
+		return useLightningForDeathChestSign;
 	}
 }

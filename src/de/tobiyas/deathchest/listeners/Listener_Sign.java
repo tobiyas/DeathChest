@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -33,7 +34,14 @@ public class Listener_Sign implements Listener {
 		Block signPosition = event.getBlock();
 		World world = player.getWorld();
 		
-		if(!(lines[1].toLowerCase().equals("[deathchest]"))) return;
+		String line1 = lines[1].toLowerCase();
+		if(!(line1.contains("deathchest"))) return;
+		
+		if(!plugin.getChestContainer().worldSupported(world)){
+			player.sendMessage(ChatColor.RED + "World: " + world.getName() + " not Supported for DeathChest.");
+			return;
+		}
+		
 		if(!plugin.getPermissionsManager().CheckPermissionsSilent(player, PermissionNode.createDeathChest)){
 			player.sendMessage(ChatColor.RED + "You don't have Permissions to set a DeathChest.");
 			return;
@@ -49,6 +57,13 @@ public class Listener_Sign implements Listener {
 		if(!location.getBlock().getType().equals(Material.CHEST)){
 			player.sendMessage(ChatColor.RED + "No chest found underneath sign.");
 			return;
+		}
+		
+		ChestContainer container = plugin.getChestContainer().getChestOfPlayer(world, player);
+		if(container !=  null){
+			ChestPosition chestContainer = (ChestPosition) container;
+			boolean useLightning = plugin.getConfigManager().useLightningForDeathChest();
+			chestContainer.destroySelf(useLightning, true); //config add Option
 		}
 		
 		plugin.getChestContainer().addChestToPlayer(location, player);
@@ -77,7 +92,50 @@ public class Listener_Sign implements Listener {
 	
 	@EventHandler
 	public void signBreak(BlockBreakEvent event){
-		if(!(event.getBlock().getType() == Material.WALL_SIGN)) return;
+		
+		Location location = null;
+		Block block = event.getBlock();
+		
+		if(block.getType() == Material.WALL_SIGN){
+			location = block.getLocation();
+			location.setY(location.getY() - 1);
+		}
+		
+		if(block.getType() == Material.CHEST){
+			location = block.getLocation();
+		}
+		
+		if(location == null) return;
+
+		
+		ChestContainer container = plugin.getChestContainer().removeFromPosition(location);
+		if(container != null){
+			ChestPosition position = (ChestPosition) container;
+			
+			boolean useLightning = plugin.getConfigManager().useLightningForDeathChest();
+			position.destroySelf(useLightning, block.getType() == Material.CHEST);
+			
+			Player player = Bukkit.getPlayer(position.getPlayerName());
+			if(player != null) player.sendMessage(ChatColor.RED + "Your DeathChest on World: " 
+								+ event.getBlock().getWorld().getName() 
+								+ " has been destroyed, by: " 
+								+ event.getPlayer().getName());
+		}
+	}
+	
+	@EventHandler
+	public void signBreak(BlockPhysicsEvent event){
+
+		Block block = event.getBlock();
+		
+		if(!(block.getType() == Material.WALL_SIGN)) return;
+			
+		org.bukkit.material.Sign signTemp = (org.bukkit.material.Sign)block.getState().getData(); //gets the face of the Block
+		if(!(block.getRelative(signTemp.getAttachedFace()).getType() == Material.AIR)) return;
+		
+		Sign sign = (Sign) block.getState();
+		
+		if(!sign.getLine(1).equals("[DeathChest]")) return;
 		
 		Location location = event.getBlock().getLocation();
 		location.setY(location.getY() - 1);
@@ -85,11 +143,14 @@ public class Listener_Sign implements Listener {
 		ChestContainer container = plugin.getChestContainer().removeFromPosition(location);
 		if(container != null){
 			ChestPosition position = (ChestPosition) container;
+			
+			boolean useLightning = plugin.getConfigManager().useLightningForDeathChest();
+			position.destroySelf(useLightning, false);
+			
 			Player player = Bukkit.getPlayer(position.getPlayerName());
 			if(player != null) player.sendMessage(ChatColor.RED + "Your DeathChest on World: " 
 								+ event.getBlock().getWorld().getName() 
-								+ " has been destroyed, by: " 
-								+ event.getPlayer().getName());
+								+ " has been destroyed.");
 		}
 	}
 }

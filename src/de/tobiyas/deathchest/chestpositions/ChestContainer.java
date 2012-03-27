@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 
 public interface ChestContainer {
 	
-	public Location getChestOfPlayer(World world, Player player);
+	public ChestContainer getChestOfPlayer(World world, Player player);
 	
 	public boolean checkPlayerHasChest(World world, Player player);
 	
@@ -15,5 +15,7 @@ public interface ChestContainer {
 	public boolean hasWorld(World world);
 	
 	public ChestContainer removeFromPosition(Location location);
+
+	public boolean worldSupported(World world);
 	
 }
