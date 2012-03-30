@@ -15,21 +15,22 @@ import org.bukkit.entity.Player;
 
 import de.tobiyas.deathchest.DeathChest;
 
-public class ChestWorlds implements ChestContainer{
+public class ChestPackage implements ChestContainer{
 
 	private LinkedList<ChestContainer> packageContainer;
 	private LinkedList<World> worldList;
 	private boolean isControler;
+	private PackageConfig pConfig;
 	
 	private String packageName;
 	
-	private YamlConfiguration packageConfig;
-	private static DeathChest plugin;
+	private YamlConfiguration packageParser;
 	
+	private static DeathChest plugin;
 	private static LinkedList<World> allWorlds;
 	
 	//constructor for package
-	private ChestWorlds(String packageName, String[] worlds){
+	private ChestPackage(String packageName, String[] worlds){
 		plugin = DeathChest.getPlugin();
 		this.packageName = packageName;
 		isControler = false;
@@ -47,34 +48,37 @@ public class ChestWorlds implements ChestContainer{
 		String packagePath = plugin.getDataFolder() + File.separator + "packages" + File.separator + packageName + ".yml";
 		File configPath = checkFile(packagePath);
 
-		packageConfig = new YamlConfiguration();
+		packageParser = new YamlConfiguration();
 		try{
-			packageConfig.load(configPath);
+			packageParser.load(configPath);
 		}catch(Exception e){
 			plugin.log("Package Loading failed: " + packageName);
 			return;
 		}
 		
-		for(String playerName : getYAMLChildren(packageConfig, packageName)){
-			ChestPosition playerChest = new ChestPosition(packageConfig, packageName, playerName);
+		for(String playerName : getYAMLChildren(packageParser, packageName)){
+			ChestPosition playerChest = new ChestPosition(packageParser, packageName, playerName);
 			packageContainer.add(playerChest);
 		}
+		
+		pConfig = new PackageConfig(packageParser, configPath);
+		
 	}
 	
 	
 	//constructor for creating all packages
-	private ChestWorlds(YamlConfiguration packageProcessor){
+	private ChestPackage(YamlConfiguration packageProcessor){
 		
 		packageContainer = new LinkedList<ChestContainer>();
-		this.packageConfig = packageProcessor;
+		this.packageParser = packageProcessor;
 		isControler = true;
 		
-		for(String packageName : getYAMLChildren(packageConfig, "worldpackages")){
-			String worldString = packageConfig.getString("worldpackages." + packageName).toString();
+		for(String packageName : getYAMLChildren(packageParser, "worldpackages")){
+			String worldString = packageParser.getString("worldpackages." + packageName).toString();
 			
 			String[] worlds  = worldString.split(";");
 			
-			ChestContainer container = new ChestWorlds(packageName, worlds);
+			ChestContainer container = new ChestPackage(packageName, worlds);
 			packageContainer.add(container);
 		}
 	}
@@ -113,7 +117,7 @@ public class ChestWorlds implements ChestContainer{
 		
 		checkPath(plugin.getDataFolder()+ File.separator + "packages" + File.separator);
 		
-		ChestWorlds container = new ChestWorlds(packageProcessor);
+		ChestPackage container = new ChestPackage(packageProcessor);
  		return container;
 	}
 	
@@ -151,7 +155,7 @@ public class ChestWorlds implements ChestContainer{
 		}else{
 			if(!worldList.contains(location.getWorld())) return false;
 			if(!checkPlayerHasChest(location.getWorld(), player)){
-				ChestContainer container = new ChestPosition(packageConfig, packageName, player, location);
+				ChestContainer container = new ChestPosition(packageParser, packageName, player, location);
 				packageContainer.add(container);
 				return true;
 			}else{
@@ -229,6 +233,20 @@ public class ChestWorlds implements ChestContainer{
 			if(worldList.contains(world)) return true;
 		}
 		return false;
+	}
+
+
+	@Override
+	public int getMaxTransferLimit(World world) {
+		if(isControler){
+			for(ChestContainer container : packageContainer){
+				int containerMaxLimit = container.getMaxTransferLimit(world);
+				if(containerMaxLimit > 0) return containerMaxLimit;
+			}
+		}else 
+			if(worldList.contains(world)) return pConfig.getMaxTrandferredItems();
+			
+		return -1;
 	}
 
 }

@@ -34,8 +34,7 @@ public class Listener_Sign implements Listener {
 		Block signPosition = event.getBlock();
 		World world = player.getWorld();
 		
-		String line1 = lines[1].toLowerCase();
-		if(!(line1.contains("deathchest"))) return;
+		if(!checkForDeathSign(lines)) return;
 		
 		if(!plugin.getChestContainer().worldSupported(world)){
 			player.sendMessage(ChatColor.RED + "World: " + world.getName() + " not Supported for DeathChest.");
@@ -76,15 +75,27 @@ public class Listener_Sign implements Listener {
 		player.sendMessage(ChatColor.GREEN + "DeathChest created for world: " + world.getName());
 	}
 	
+	private boolean checkForDeathSign(String[] lines){
+		for(String line : lines){
+			line = line.toLowerCase();
+			if(line.contains("deathchest")) return true;
+		}
+		
+		return false;
+	}
+	
 	private boolean checkLWC(Location location, Player player){
 		if(!plugin.getConfigManager().checkDeathChestWithLWC()) return true;
 		
 		try{
 			LWCPlugin LWC = (LWCPlugin) Bukkit.getPluginManager().getPlugin("LWC");
+			if(LWC == null) throw new Exception();
+			
 			return LWC.getLWC().canAccessProtection(player, location.getBlock());
 			
 		}catch(Exception e){
-			plugin.log("LWC not Found. Disable LWC Config options for DeathChests!");
+			plugin.log("LWC not Found. Disable LWC Config options for DeathChests. It will be Disabled for now!");
+			plugin.getConfigManager().tempTurnOffLWC();
 			return true;
 		}
 	}

@@ -1,7 +1,7 @@
 name: DeathChest
 main: de.tobiyas.deathchest.DeathChest
-version: 1.0
-website: http://
+version: 1.01
+website: http://dev.bukkit.org/server-mods/deathchest/
 author: Tobiyas
 depend: [Vault]
 softdepend: [WorldGuard, LWC]
@@ -15,7 +15,12 @@ commands:
 #    description: fsafsaf
 #    aliases: []
 #    usage: |
-#           /<command> 
+#           /<command>
+  dcversion:
+    description: displays the Version of DeathChest
+    aliases: []
+    usage: |
+           /dcversion
   dcreload:
     description: reloads DeathChestConfig
     aliases: []

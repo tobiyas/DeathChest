@@ -18,4 +18,5 @@ public interface ChestContainer {
 
 	public boolean worldSupported(World world);
 	
+	public int getMaxTransferLimit(World world);	
 }

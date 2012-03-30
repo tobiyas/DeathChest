@@ -150,5 +150,10 @@ public class ChestPosition implements ChestContainer{
 	public boolean worldSupported(World world) {
 		return true;
 	}
+
+	@Override //not used in this struct
+	public int getMaxTransferLimit(World world) {
+		return 0;
+	}
 	
 }

@@ -67,6 +67,8 @@ public class InitStructure {
 				config.load(file);
 				
 				config.createSection("package1");
+				config.createSection("config");
+				config.createSection("config.maxTransferredItems");
 				config.save(file);
 				
 			} catch (IOException e) {

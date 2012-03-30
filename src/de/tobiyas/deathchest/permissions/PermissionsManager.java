@@ -25,10 +25,12 @@ public class PermissionsManager {
 	}
 	
 	private Boolean setupPermissions(){
-		RegisteredServiceProvider<Permission> permissionProvider = this.plugin.getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
-		if (permissionProvider != null) {
-			permission = permissionProvider.getProvider();
-			}
+		try{
+			RegisteredServiceProvider<Permission> permissionProvider = this.plugin.getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
+			if (permissionProvider != null)
+				permission = permissionProvider.getProvider();
+			
+			}catch(Exception e){}
 		
 		return (permission != null);
 	}
