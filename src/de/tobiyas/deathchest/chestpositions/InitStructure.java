@@ -15,6 +15,10 @@ public class InitStructure {
 
 	private static DeathChest plugin;
 	
+	/**
+	 * Checks and inits the packaging system.
+	 * Creates a Demo with all worlds in one package if none exists
+	 */
 	public static void checkAndInitPaths(){
 		plugin = DeathChest.getPlugin();
 		
@@ -26,6 +30,12 @@ public class InitStructure {
 	}
 
 
+	
+	/**
+	 * Creates the packages.yml
+	 * 
+	 * @param path
+	 */
 	private static void fileCreate(String path){
 		File file = new File(path);
 		
@@ -56,6 +66,12 @@ public class InitStructure {
 			}
 	}
 	
+	
+	/**
+	 * Creates a package in /plugins/DeathChest/packages/
+	 * 
+	 * @param path
+	 */
 	private static void fileCreate2(String path) {
 		File file = new File(path);
 		
@@ -79,6 +95,12 @@ public class InitStructure {
 		
 	}
 	
+	
+	/**
+	 * Checks if a path exists and creates it, if not
+	 * 
+	 * @param path
+	 */
 	private static void checkPath(String path){
 		File file = new File(path);
 		

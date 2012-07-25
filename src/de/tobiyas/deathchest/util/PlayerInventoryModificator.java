@@ -1,9 +1,10 @@
 package de.tobiyas.deathchest.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -14,16 +15,27 @@ public class PlayerInventoryModificator {
 	private PlayerInventory inventory;
 	private DeathChest plugin;
 	private HashMap<Integer, ItemStack> map;
-	private World world;
+	private Player player;
 	
-	public PlayerInventoryModificator(PlayerInventory inventory, World world){
+	/**
+	 * Sets up an Modificator for a Player inventory
+	 * 
+	 * @param inventory of the Player
+	 * @param player
+	 */
+	public PlayerInventoryModificator(PlayerInventory inventory, Player player){
 		this.inventory = inventory;
 		this.map = new HashMap<Integer, ItemStack>();
-		this.world = world;
+		this.player = player;
 		
 		plugin = DeathChest.getPlugin();
 	}
 	
+	/**
+	 * modifies the inventory of the Player to the given configuration
+	 * 
+	 * @param spawnChest if the items will be stored to a spawnchest
+	 */
 	public void modifyToConfig(boolean spawnChest){
 		int count = 0;
 		for(ItemStack stack : inventory.getContents())
@@ -37,16 +49,38 @@ public class PlayerInventoryModificator {
 		if(spawnChest) return;
 		
 		
-		int limit = plugin.getChestContainer().getMaxTransferLimit(world);
+		int limit = plugin.getChestContainer().getMaxTransferLimit(player);
 		boolean random = plugin.getConfigManager().checkRandomPick();
 		
 		limitItemDrops(limit, random);
 	}
 	
+	/**
+	 * Returns a HashMap with a List of Items left in the Inventory
+	 * Keys = some Integer to avoid deleting doubled stacks
+	 * 
+	 * @return the HashMap with Items
+	 */
 	public HashMap<Integer, ItemStack> getItems(){
 		return map;
 	}
 	
+	public ArrayList<ItemStack> getItemsAsList(){
+		ArrayList<ItemStack> list = new ArrayList<ItemStack>();
+		for(int id : map.keySet()){
+			ItemStack tempStack = map.get(id);
+			if(tempStack != null) list.add(tempStack);
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * limits the items to a given limit
+	 * 
+	 * @param limit the limit to limit to
+	 * @param random if the items should be removed randomly
+	 */
 	private void limitItemDrops(int limit, boolean random){
 		if(map.size() <= limit) return;
 		
@@ -61,6 +95,9 @@ public class PlayerInventoryModificator {
 		}
 	}
 	
+	/**
+	 * removes an Item by random
+	 */
 	private void removeRandomOffSet(){
 		if(map.size() == 0) return;
 		
@@ -72,6 +109,9 @@ public class PlayerInventoryModificator {
 		map.remove(item);
 	}
 	
+	/**
+	 *  removes the last Item
+	 */
 	private void removeLast(){
 		if(map.size() == 0) return;
 		

@@ -1,25 +1,4 @@
 /**
- * LICENSING
- * 
- * This software is copyright by Adamki11s <adam@adamki11s.co.uk> and is
- * distributed under a dual license:
- * 
- * Non-Commercial Use:
- *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * Commercial Use:
- *    Please contact adam@adamki11s.co.uk
  */
 
 package de.tobiyas.deathchest.util.updater;
@@ -42,9 +21,10 @@ public class Updater{
 	private DeathChest plugin;
 	
 	private URL url;
+	private String downloadLink;
 	
 	/**
-	 * Constructor for variables needed for the AutoUpdaterCore.
+	 *
 	 * @param website the url to the Info site
 	 */
 	public Updater(String website){
@@ -73,24 +53,19 @@ public class Updater{
 		source = Fetcher.fetchSource(url);
 		formatSource(source);
 		
-		String subVers;
-		if(currentSubVersion == 0){
-			subVers = "";
-		} else {
-			subVers = Integer.toString(currentSubVersion);
+		if(versionNO > currentVersion || (versionNO == currentVersion && subVersionNO > currentSubVersion)){
+			plugin.log("Updater: You are not running the latest version!");
+			plugin.log("Updater: Running version : " + currentVersion + "_" + currentSubVersion + ". Latest version : " + versionNO + "_" + subVersionNO + ".");
+			return false;
 		}
 		
-		if(versionNO != currentVersion){
-			plugin.log("Updater: You are not running the latest version!");
-			plugin.log("Updater: Running version : " + currentVersion + "_" + subVers + ". Latest version : " + versionNO + "_" + subVersionNO + ".");
-			return false;
-		} else if(subVersionNO != currentSubVersion) {
-			plugin.log("Updater: You are not running the latest sub version!");
-			plugin.log("Updater: Running version : " + currentVersion + "_" + subVers + ". Latest version : " + versionNO + "_" + subVersionNO + ".");
-			return false;
-		} else if(versionNO == currentVersion && subVersionNO == currentSubVersion){
+		if(versionNO < currentVersion || (versionNO == currentVersion && subVersionNO < currentSubVersion)){
+			plugin.log("Updater: Your version is higher than the actual.");
 			return true;
 		}
+		
+		if(versionNO == currentVersion && subVersionNO == currentSubVersion)
+			return true;
 		
 		return false;
 		
@@ -102,11 +77,10 @@ public class Updater{
 	 * @param downloadLink - String
 	 * @param pluginName - String
 	 */
-	public boolean forceDownload(String downloadLink){
+	public boolean forceDownload(){
 		String pluginName = plugin.getDescription().getName();
 		
-		String downloadPath = "plugins" + File.separator;
-		downloadPath += pluginName + ".jar";
+		File downloadPath = plugin.getServer().getUpdateFolderFile();
 				
 		plugin.log("Updater: Downloading newest version of " + pluginName + "...");
 		
@@ -140,12 +114,11 @@ public class Updater{
 		try{
 			versionNO = Double.parseDouble(parts[1]);
 			subVersionNO = Integer.parseInt(parts[2]);
+			downloadLink = parts[3];
 		} catch (NumberFormatException ex){
 			ex.printStackTrace();
-			plugin.log("Updater: Error while parsing version number!");
+			plugin.log("Updater: Error while parsing Update Info!");
 		}
-
 	}
-	
-	
+
 }

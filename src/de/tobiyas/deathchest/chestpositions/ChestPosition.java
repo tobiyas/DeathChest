@@ -13,6 +13,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 
+/**
+ * @author Toby
+ *
+ */
 public class ChestPosition implements ChestContainer{
 	
 	private DeathChest plugin;
@@ -28,8 +32,17 @@ public class ChestPosition implements ChestContainer{
 	private Location chestLocation;
 	private Location signLocation;
 	
+	private int exp;
+	
 	private String savePath;
 	
+	/**
+	 * Constructor for loading from file
+	 * 
+	 * @param config the YAMLConfiguration to load from
+	 * @param packageName to load from
+	 * @param player to load from
+	 */
 	public ChestPosition(YamlConfiguration config, String packageName, String player){
 		plugin = DeathChest.getPlugin();
 		this.config = config;
@@ -43,6 +56,12 @@ public class ChestPosition implements ChestContainer{
 		}
 	}
 	
+	/**
+	 * tries to load a Player from the Config
+	 * 
+	 * @param player
+	 * @throws IOException accures if an error accures while loading
+	 */
 	private void tryLoadChest(String player) throws IOException{
 		this.player = player;
 		String playerPrefix = packageName + "." + player + ".";
@@ -50,6 +69,7 @@ public class ChestPosition implements ChestContainer{
 		posX = config.getDouble(playerPrefix + "X", Double.MAX_VALUE);
 		posY = config.getDouble(playerPrefix + "Y", Double.MAX_VALUE);
 		posZ = config.getDouble(playerPrefix + "Z", Double.MAX_VALUE);
+		exp = config.getInt(playerPrefix + "exp", 0);
 		
 		String worldName = config.getString(playerPrefix + "World", "");
 		
@@ -60,9 +80,16 @@ public class ChestPosition implements ChestContainer{
 		
 		chestLocation = new Location(world, posX, posY, posZ);
 		signLocation = new Location(world, posX, posY + 1, posZ);
-		//plugin.log("player: " + player + " world: " + world.getName() + " posX: " + posX + " posY: " + posY + " posZ: " + posZ);
 	}
 	
+	/**
+	 * Constructor for creating a DeathChest in Game
+	 * 
+	 * @param config the YAMLConfiguration of the package
+	 * @param packageName
+	 * @param player
+	 * @param location
+	 */
 	public ChestPosition(YamlConfiguration config, String packageName, Player player, Location location){
 		this.plugin = DeathChest.getPlugin();
 		this.config = config;
@@ -70,6 +97,77 @@ public class ChestPosition implements ChestContainer{
 		this.savePath = plugin.getDataFolder() + File.separator + "packages" + File.separator + packageName + ".yml";
 		
 		addChestToPlayer(location,player);
+	}
+	
+	/**
+	 * Constructor for creating a DeathChest in Game
+	 * 
+	 * @param config the YAMLConfiguration of the package
+	 * @param packageName
+	 * @param player
+	 * @param location
+	 */
+	public ChestPosition(YamlConfiguration config, String packageName, String player, Location location){
+		this.plugin = DeathChest.getPlugin();
+		this.config = config;
+		this.packageName = packageName;
+		this.savePath = plugin.getDataFolder() + File.separator + "packages" + File.separator + packageName + ".yml";
+		
+		addChestToPlayer(location,player);
+	}
+	
+	
+	/**
+	 * Tells a DeathChest to destroy self (destroys the sign above and removes out of list)
+	 * 
+	 * @param lightning if it should have a lightning effect
+	 * @param breakNaturaly if it should drop the sign
+	 */
+	public void destroySelf(boolean lightning, boolean breakNaturaly){
+		if(!signLocation.getBlock().getType().equals(Material.WALL_SIGN)) return;
+		if(lightning) world.strikeLightningEffect(signLocation);
+		if(breakNaturaly) world.getBlockAt(signLocation).breakNaturally();
+		plugin.getProtectionManager().unprotectSign(signLocation);
+	}
+	
+	public String getPlayerName(){
+		return player;
+	}
+	
+	public Location getLocation(){
+		return chestLocation;
+	}
+	
+	public Location getSignLocation(){
+		return signLocation;
+	}
+	
+	public int getStoredEXP(){
+		int exp = this.exp;
+		this.exp = 0;
+		
+		String playerPrefix = packageName + "." + player;
+		config.set(playerPrefix + ".exp", 0);
+		try {
+			config.save(savePath);
+		} catch (IOException e) {
+			plugin.log("Saving config failed");
+		}
+		
+		return exp;
+	}
+	
+	public void addEXP(int amount){
+		this.exp += amount;
+		
+		String playerPrefix = packageName + "." + player;
+		config.set(playerPrefix + ".exp", exp);
+		
+		try {
+			config.save(savePath);
+		} catch (IOException e) {
+			plugin.log("Saving config failed");
+		}
 	}
 
 
@@ -88,28 +186,7 @@ public class ChestPosition implements ChestContainer{
 
 	@Override
 	public boolean addChestToPlayer(Location location, Player player) {
-		this.player = player.getName();
-		this.world = location.getWorld();
-		this.posX = location.getX();
-		this.posY = location.getY();
-		this.posZ = location.getZ();
-		this.chestLocation = location;
-		this.signLocation = new Location(world, posX, posY + 1, posZ);
-		
-		String playerPrefix = packageName + "." + player.getName();
-		
-		config.set(playerPrefix + ".World", world.getName());
-		config.set(playerPrefix + ".X", posX);
-		config.set(playerPrefix + ".Y", posY);
-		config.set(playerPrefix + ".Z", posZ);
-		
-		try {
-			config.save(savePath);
-		} catch (IOException e) {
-			plugin.log("Saving config failed");
-		}
-		
-		return true;
+		return addChestToPlayer(location, player.getName());
 	}
 
 	@Override //not used in this struct
@@ -131,20 +208,6 @@ public class ChestPosition implements ChestContainer{
 		
 		return this;
 	}
-	
-	public String getPlayerName(){
-		return player;
-	}
-	
-	public Location getLocation(){
-		return chestLocation;
-	}
-	
-	public void destroySelf(boolean lightning, boolean breakNaturaly){
-		if(!signLocation.getBlock().getType().equals(Material.WALL_SIGN)) return;
-		if(lightning) world.strikeLightningEffect(signLocation);
-		if(breakNaturaly) world.getBlockAt(signLocation).breakNaturally();
-	}
 
 	@Override //not used in this struct
 	public boolean worldSupported(World world) {
@@ -152,8 +215,49 @@ public class ChestPosition implements ChestContainer{
 	}
 
 	@Override //not used in this struct
-	public int getMaxTransferLimit(World world) {
-		return 0;
+	public int getMaxTransferLimit(Player player) {
+		return -1;
+	}
+
+	@Override
+	public ChestContainer getChestOfPlayer(World world, String player) {
+		if(!checkPlayerHasChest(world, player)) return null;
+		return this;
+	}
+	
+	@Override
+	public boolean checkPlayerHasChest(World world, String player) {
+		if(!player.equals(this.player)) return false;
+		return true;
+	}
+
+	@Override
+	public boolean addChestToPlayer(Location location, String player) {
+		this.player = player;
+		this.world = location.getWorld();
+		this.posX = location.getX();
+		this.posY = location.getY();
+		this.posZ = location.getZ();
+		this.chestLocation = location;
+		this.signLocation = new Location(world, posX, posY + 1, posZ);
+		this.exp = 0;
+		
+		String playerPrefix = packageName + "." + player;
+		
+		config.set(playerPrefix + ".World", world.getName());
+		config.set(playerPrefix + ".X", posX);
+		config.set(playerPrefix + ".Y", posY);
+		config.set(playerPrefix + ".Z", posZ);
+		
+		config.set(playerPrefix + ".exp", 0);
+		
+		try {
+			config.save(savePath);
+		} catch (IOException e) {
+			plugin.log("Saving config failed");
+		}
+		
+		return true;
 	}
 	
 }

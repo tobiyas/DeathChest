@@ -5,14 +5,28 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import de.tobiyas.deathchest.DeathChest;
 import de.tobiyas.deathchest.util.Const;
 
 public class CommandExecutor_DCVersion implements CommandExecutor{
+	
+	private DeathChest plugin;
+	
+	public CommandExecutor_DCVersion(){
+		plugin = DeathChest.getPlugin();
+		try{
+			plugin.getCommand("dcversion").setExecutor(this);
+		}catch(Exception e){
+			plugin.log("ERROR: Could not register command /dcversion.");
+		}
+		
+	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label,
 			String[] args) {
-		sender.sendMessage(ChatColor.GREEN + "Current DeathChest version: " + Const.currentVersion + "_" + Const.currentBuildVersion);		
+		sender.sendMessage(ChatColor.YELLOW + "Current DeathChest version: " + Const.currentVersion + "_" + Const.currentBuildVersion);
+		sender.sendMessage(ChatColor.YELLOW + "Working with Permission-System: " + plugin.getPermissionsManager().getPermissionsName());
 		
 		return true;
 	}

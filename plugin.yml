@@ -1,21 +1,15 @@
 name: DeathChest
 main: de.tobiyas.deathchest.DeathChest
-version: 1.01
+version: 1.08
 website: http://dev.bukkit.org/server-mods/deathchest/
 author: Tobiyas
-depend: [Vault]
-softdepend: [WorldGuard, LWC]
+depend:
+softdepend: [WorldGuard, LWC, Vault, PermissionsEx, GroupManager, PermissionsBukkit, SecureChests]
 
 
 description: >
              Fills a chest with your stuff, if you die.
 commands:
-# only for testing!
-#  killself:
-#    description: fsafsaf
-#    aliases: []
-#    usage: |
-#           /<command>
   dcversion:
     description: displays the Version of DeathChest
     aliases: []
@@ -26,3 +20,23 @@ commands:
     aliases: []
     usage: |
            /dcreload
+  dchelp:
+    description: help for DeathChest
+    aliases: [dc]
+    usage: |
+           /dchelp
+  dcpermcheck:
+    description: permission Check for sender
+    aliases: [dcpc]
+    usage: |
+           /dcpermcheck
+  dcgravelist:
+    description: lists all your GraveStones
+    aliases: [dcgl]
+    usage: |
+           /dcgravelist
+  dcport:
+    description: ports to actual DeathChest
+    aliases: [dcp]
+    usage: |
+           /dcport   

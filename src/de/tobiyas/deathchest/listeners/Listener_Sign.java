@@ -11,14 +11,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
-
-import com.griefcraft.lwc.LWCPlugin;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 import de.tobiyas.deathchest.DeathChest;
 import de.tobiyas.deathchest.chestpositions.ChestContainer;
 import de.tobiyas.deathchest.chestpositions.ChestPosition;
 import de.tobiyas.deathchest.permissions.PermissionNode;
 
+/**
+ * @author tobiyas
+ *
+ */
 public class Listener_Sign implements Listener {
 
 	private DeathChest plugin;
@@ -34,6 +37,12 @@ public class Listener_Sign implements Listener {
 		Block signPosition = event.getBlock();
 		World world = player.getWorld();
 		
+		if(event.getLine(0).equals(ChatColor.RED + "[GraveStone]")) {
+			event.getPlayer().sendMessage(ChatColor.RED + "You may create no GraveStone!");
+			event.setCancelled(true);
+			return;
+		}
+		
 		if(!checkForDeathSign(lines)) return;
 		
 		if(!plugin.getChestContainer().worldSupported(world)){
@@ -41,15 +50,16 @@ public class Listener_Sign implements Listener {
 			return;
 		}
 		
-		if(!plugin.getPermissionsManager().CheckPermissionsSilent(player, PermissionNode.createDeathChest)){
+		if(!plugin.getPermissionsManager().checkPermissionsSilent(player, PermissionNode.createDeathChest) && 
+			!plugin.getPermissionsManager().checkPermissionsSilent(player, PermissionNode.simpleUse)){
 			player.sendMessage(ChatColor.RED + "You don't have Permissions to set a DeathChest.");
 			return;
 		}
 		
 		Location location = new Location(world, signPosition.getX(), signPosition.getY() - 1, signPosition.getZ());
 		
-		if(!checkLWC(location, player)){
-			player.sendMessage(ChatColor.RED + "You don't have LWC access to the Chest below.");
+		if(!plugin.getProtectionManager().checkProtection(location, player)){
+			player.sendMessage(ChatColor.RED + "You don't have access to the Chest below.");
 			return;
 		}
 		
@@ -58,23 +68,34 @@ public class Listener_Sign implements Listener {
 			return;
 		}
 		
-		ChestContainer container = plugin.getChestContainer().getChestOfPlayer(world, player);
+		String playerCreation = checkOtherPlayerCreation(event.getLine(1), player);
+		
+		ChestContainer container = plugin.getChestContainer().getChestOfPlayer(world, playerCreation);
 		if(container !=  null){
 			ChestPosition chestContainer = (ChestPosition) container;
 			boolean useLightning = plugin.getConfigManager().useLightningForDeathChest();
-			chestContainer.destroySelf(useLightning, true); //config add Option
+			chestContainer.destroySelf(useLightning, true);
 		}
 		
-		plugin.getChestContainer().addChestToPlayer(location, player);
+		plugin.getChestContainer().addChestToPlayer(location, playerCreation);
 		
-		event.setLine(0, player.getName());
+		event.setLine(0, playerCreation);
 		event.setLine(1, "[DeathChest]");
 		event.setLine(2, world.getName());
 		event.setLine(3, "");
 		
-		player.sendMessage(ChatColor.GREEN + "DeathChest created for world: " + world.getName());
+		if(player.getName() != playerCreation)
+			player.sendMessage(ChatColor.GREEN + "DeathChest created for world: " + world.getName() + " for player: " + ChatColor.RED + playerCreation);
+		else
+			player.sendMessage(ChatColor.GREEN + "DeathChest created for world: " + world.getName());
 	}
 	
+	/**
+	 * Checks if the String[] contain "deathchest"
+	 * 
+	 * @param lines the String[] to check
+	 * @return if it containes "deathchest"
+	 */
 	private boolean checkForDeathSign(String[] lines){
 		for(String line : lines){
 			line = line.toLowerCase();
@@ -84,20 +105,19 @@ public class Listener_Sign implements Listener {
 		return false;
 	}
 	
-	private boolean checkLWC(Location location, Player player){
-		if(!plugin.getConfigManager().checkDeathChestWithLWC()) return true;
+	private String checkOtherPlayerCreation(String possiblePlayer, Player player){
+		String orgPlayer = player.getName();
 		
-		try{
-			LWCPlugin LWC = (LWCPlugin) Bukkit.getPluginManager().getPlugin("LWC");
-			if(LWC == null) throw new Exception();
-			
-			return LWC.getLWC().canAccessProtection(player, location.getBlock());
-			
-		}catch(Exception e){
-			plugin.log("LWC not Found. Disable LWC Config options for DeathChests. It will be Disabled for now!");
-			plugin.getConfigManager().tempTurnOffLWC();
-			return true;
-		}
+		if(possiblePlayer.length() == 0 || possiblePlayer.toLowerCase().contains("deathchest"))
+			return orgPlayer;
+		
+		if(!plugin.getPermissionsManager().checkPermissions(player, PermissionNode.otherChestCreate)) 
+			return orgPlayer;
+		
+		if(Bukkit.getServer().getOfflinePlayer(possiblePlayer) == null)
+			return orgPlayer;
+
+		return possiblePlayer;
 	}
 	
 	
@@ -106,6 +126,14 @@ public class Listener_Sign implements Listener {
 		
 		Location location = null;
 		Block block = event.getBlock();
+		
+		if(block.getType() == Material.SIGN_POST){
+			Sign sign = (Sign) block.getState();
+			if(sign.getLine(0).equals(ChatColor.RED + "[GraveStone]"))
+				if(plugin.interactSpawnContainerController().interactSign(event.getPlayer(), event.getBlock().getLocation()))
+					event.setCancelled(true);
+				return;
+		}
 		
 		if(block.getType() == Material.WALL_SIGN){
 			location = block.getLocation();
@@ -132,6 +160,58 @@ public class Listener_Sign implements Listener {
 								+ " has been destroyed, by: " 
 								+ event.getPlayer().getName());
 		}
+	}
+	
+	@EventHandler
+	public void signInteract(PlayerInteractEvent event){		
+		if(event.getAction() != Action.RIGHT_CLICK_BLOCK)
+			return;
+		
+		Block block = event.getClickedBlock();
+		if(block.getType() != Material.WALL_SIGN)
+			return;
+		
+		Sign sign = (Sign) block.getState();
+		
+		if(!sign.getLine(1).equals("[DeathChest]"))
+			return;
+		
+		Location signPosition = event.getClickedBlock().getLocation();
+		Player player = event.getPlayer();
+		
+		ChestContainer container = plugin.getChestContainer().getChestOfPlayer(player.getWorld(), player);
+		if(container == null){
+			player.sendMessage(ChatColor.RED + "This is not Your DeathChest!");
+			return;
+		}
+		
+		ChestPosition chestPos = (ChestPosition) container;
+		String playerName = chestPos.getPlayerName();
+		
+		if(!playerName.equals(player.getName())){
+			return;
+		}
+		
+		if(signPosition.distance(chestPos.getSignLocation()) == 0){
+			int exp = chestPos.getStoredEXP();
+			
+			if(exp == 0){
+				player.sendMessage(ChatColor.RED + "No Experience stored.");
+				return;
+			}
+			
+			for( ; exp > 0; exp -= 5){
+				player.giveExp(5);
+			}
+
+			if(exp > 0){
+				player.giveExp(exp);
+			}
+			player.sendMessage(ChatColor.GREEN + "All EXP given to you");
+		}else{
+			player.sendMessage(ChatColor.RED + "This is not Your DeathChest!");
+		}
+			
 	}
 	
 	@EventHandler

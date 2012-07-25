@@ -9,24 +9,34 @@ package de.tobiyas.deathchest;
 
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import org.bukkit.plugin.PluginDescriptionFile;
 
 import de.tobiyas.deathchest.chestpositions.ChestContainer;
 import de.tobiyas.deathchest.chestpositions.ChestPackage;
-import de.tobiyas.deathchest.commands.CommandExecuter_DCReload;
+import de.tobiyas.deathchest.commands.CommandExecutor_DCPermCheck;
+import de.tobiyas.deathchest.commands.CommandExecutor_DCPort;
+import de.tobiyas.deathchest.commands.CommandExecutor_DCReload;
+import de.tobiyas.deathchest.commands.CommandExecutor_DCHelp;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCVersion;
+import de.tobiyas.deathchest.commands.CommandExecutor_GYPos;
 import de.tobiyas.deathchest.config.ConfigManager;
 
 import de.tobiyas.deathchest.listeners.Listener_Entity;
 import de.tobiyas.deathchest.listeners.Listener_Sign;
-import de.tobiyas.deathchest.permissions.PermissionsManager;
+import de.tobiyas.deathchest.spawncontainer.SpawnContainerController;
+import de.tobiyas.deathchest.util.BattleNightChecker;
 import de.tobiyas.deathchest.util.Const;
+import de.tobiyas.deathchest.util.protection.ProtectionManager;
 import de.tobiyas.deathchest.util.updater.Restarter;
 import de.tobiyas.deathchest.util.updater.Updater;
+import de.tobiyas.util.metrics.SendMetrics;
+import de.tobiyas.util.permissions.PermissionManager;
 
 
 /**
@@ -38,15 +48,17 @@ public class DeathChest extends JavaPlugin{
 	private PluginDescriptionFile description;
 	
 	private ConfigManager cManager;
-	private PermissionsManager pManager;
-	
-	private ChestContainer cContainer;
-	
-	private static DeathChest plugin;
-
-	private String prefix;
+	private PermissionManager pManager;
 	
 	private Updater updater;
+	private ChestContainer cContainer;
+	private static DeathChest plugin;
+	private SpawnContainerController spawnSignController;
+	
+	private ProtectionManager protectionManager;
+	private BattleNightChecker bchecker;
+	
+	private String prefix;
 
 	
 	@Override
@@ -62,8 +74,6 @@ public class DeathChest extends JavaPlugin{
 		
 		Const.currentVersion = Double.parseDouble(split[0]);
 		Const.currentBuildVersion = Integer.parseInt(split[1]);
-
-		//log("loading "+description.getFullName());
 		
 		Const.oldBukkitVersion = false;
 		if(!checkBukkitVersion()) Const.oldBukkitVersion = true;
@@ -71,14 +81,19 @@ public class DeathChest extends JavaPlugin{
 		updater = new Updater(Const.updaterURL + "versions.html");
 		
 		cManager = new ConfigManager();
-		pManager = new PermissionsManager();
+		initPermissionManager();
 		
 		cContainer = ChestPackage.createALLPackages();
+		spawnSignController = new SpawnContainerController();
 
 		addEvents();
 		addCommands();
+		
+		initBattleNight();
+		protectionManager = new ProtectionManager();
+		SendMetrics.sendMetrics(this);
 
-		log(description.getFullName() + " fully loaded.");
+		log(description.getFullName() + " fully loaded with " + pManager.getPermissionsName() + " hooked.");
 	}
 	
 	/**
@@ -109,11 +124,12 @@ public class DeathChest extends JavaPlugin{
 	 * chesks if a new Version is available and downloads it
 	 */
 	private void checkPluginUpdates(){
-		if(!plugin.getConfigManager().checkUpdater()) return;
+		if(!plugin.getConfigManager().checkRemindUpdate()) return;
 		
 		//Restarter restarter = new Restarter(this);
 		if(!updater.checkVersion(Const.currentVersion, Const.currentBuildVersion))
-			if(updater.forceDownload(Const.updaterURL + "DeathChest.jar")){
+			if(plugin.getConfigManager().checkUpdater()){
+				updater.forceDownload();
 				//reloadPlugin(restarter);   //not working
 			}
 		
@@ -134,14 +150,36 @@ public class DeathChest extends JavaPlugin{
 	 * Registers Bukkit-Commands
 	 */
 	private void addCommands(){
-		//getCommand("killself").setExecutor(new CommandExecutor_Testcommand(this));
-		getCommand("dcversion").setExecutor(new CommandExecutor_DCVersion());
-		getCommand("dcreload").setExecutor(new CommandExecuter_DCReload(this));
+		new CommandExecutor_DCReload();
+		new CommandExecutor_DCVersion();
+		new CommandExecutor_DCHelp();
+		new CommandExecutor_DCPermCheck();
+		new CommandExecutor_GYPos();
+		new CommandExecutor_DCPort();
+	}
+	
+	private void initBattleNight(){
+		bchecker = new BattleNightChecker();
+		try{
+			bchecker.isActive();
+		}catch(NoClassDefFoundError e){
+			bchecker = null;
+		}
+	}
+	
+	private void initPermissionManager(){
+		ArrayList<String> decline = new ArrayList<String>();
+		decline.add("bPermissions");
+		pManager = new PermissionManager(this, decline);
 	}
 	
 	@Override
 	public void onDisable(){
-		checkPluginUpdates();
+		interactSpawnContainerController().saveAllSigns();
+		try{
+			checkPluginUpdates();
+		}catch(NoClassDefFoundError e){}
+		
 		log("disabled "+description.getFullName());
 	}
 	
@@ -168,7 +206,7 @@ public class DeathChest extends JavaPlugin{
 	/**
 	 * @return the PermissionsManager
 	 */
-	public PermissionsManager getPermissionsManager(){
+	public PermissionManager getPermissionsManager(){
 		return pManager;
 	}
 	
@@ -184,6 +222,20 @@ public class DeathChest extends JavaPlugin{
 	 */
 	public void reloadChestContainer() {
 		cContainer = ChestPackage.createALLPackages();
+	}
+	
+	public SpawnContainerController interactSpawnContainerController(){
+		return spawnSignController;
+	}
+	
+	public ProtectionManager getProtectionManager(){
+		return protectionManager;
+	}
+	
+	public boolean isBattleNight(Player player){
+		if(bchecker == null) return false;
+		if(!bchecker.isActive()) return false;
+		return bchecker.checkForBattleNight(player);
 	}
 	
 	/**
