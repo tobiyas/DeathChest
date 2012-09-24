@@ -132,7 +132,8 @@ public class Listener_Sign implements Listener {
 			if(sign.getLine(0).equals(ChatColor.RED + "[GraveStone]"))
 				if(plugin.interactSpawnContainerController().interactSign(event.getPlayer(), event.getBlock().getLocation()))
 					event.setCancelled(true);
-				return;
+			
+			return;
 		}
 		
 		if(block.getType() == Material.WALL_SIGN){
@@ -168,6 +169,14 @@ public class Listener_Sign implements Listener {
 			return;
 		
 		Block block = event.getClickedBlock();
+		Location signPosition = event.getClickedBlock().getLocation();
+		Player player = event.getPlayer();
+		
+		if(block.getType() == Material.SIGN_POST){
+			if(checkGraveSign(player, block))
+				return;
+		}
+		
 		if(block.getType() != Material.WALL_SIGN)
 			return;
 		
@@ -175,9 +184,6 @@ public class Listener_Sign implements Listener {
 		
 		if(!sign.getLine(1).equals("[DeathChest]"))
 			return;
-		
-		Location signPosition = event.getClickedBlock().getLocation();
-		Player player = event.getPlayer();
 		
 		ChestContainer container = plugin.getChestContainer().getChestOfPlayer(player.getWorld(), player);
 		if(container == null){
@@ -192,25 +198,37 @@ public class Listener_Sign implements Listener {
 			return;
 		}
 		
-		if(signPosition.distance(chestPos.getSignLocation()) == 0){
-			int exp = chestPos.getStoredEXP();
-			
-			if(exp == 0){
-				player.sendMessage(ChatColor.RED + "No Experience stored.");
-				return;
-			}
-			
-			for( ; exp > 0; exp -= 5){
-				player.giveExp(5);
-			}
-
-			if(exp > 0){
-				player.giveExp(exp);
-			}
-			player.sendMessage(ChatColor.GREEN + "All EXP given to you");
+		if(signPosition.distanceSquared(chestPos.getSignLocation()) == 0){
+			giveEXP(player, chestPos.getStoredEXP());
 		}else{
 			player.sendMessage(ChatColor.RED + "This is not Your DeathChest!");
 		}
+	}
+	
+	private boolean checkGraveSign(Player player, Block signBlock){
+		Sign sign = (Sign) signBlock.getState();		
+		
+		if(sign.getLine(0).equals(ChatColor.RED + "[GraveStone]"))
+			if(plugin.interactSpawnContainerController().interactSign(player, signBlock.getLocation()))
+				return true;
+		
+		return false;
+	}
+		
+	private void giveEXP(Player player, int exp){		
+		if(exp == 0){
+			player.sendMessage(ChatColor.RED + "No Experience stored.");
+			return;
+		}
+		
+		for( ; exp > 0; exp -= 5){
+			player.giveExp(5);
+		}
+
+		if(exp > 0){
+			player.giveExp(exp);
+		}
+		player.sendMessage(ChatColor.GREEN + "All EXP given to you");
 			
 	}
 	

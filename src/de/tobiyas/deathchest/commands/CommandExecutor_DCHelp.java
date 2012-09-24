@@ -33,7 +33,11 @@ public class CommandExecutor_DCHelp implements CommandExecutor {
 			sender.sendMessage(ChatColor.RED + "/dcreload" + ChatColor.YELLOW + " Reloads the Config of DC.");
 		if(plugin.getPermissionsManager().checkPermissionsSilent(sender, PermissionNode.portToDeathChest))
 			sender.sendMessage(ChatColor.RED + "/dcport" + ChatColor.YELLOW + " teleports you to your DeathChest.");
-		sender.sendMessage(ChatColor.RED + "/dcgravelist" + ChatColor.YELLOW + " lists the Position of all your GraveYard signs.");
+		if(plugin.getPermissionsManager().checkPermissionsSilent(sender, PermissionNode.removeChest))
+			sender.sendMessage(ChatColor.RED + "/dcremove [WorldName] [PlayerName] " + ChatColor.YELLOW + "removes DeathChest of Player from World.");
+		sender.sendMessage(ChatColor.RED + "/dcgravelist [PlayerName]" + ChatColor.YELLOW + " lists the Position of all your/PlayerName's GraveYard signs.");
+		if(plugin.getPermissionsManager().hasAnyPermissions(sender, PermissionNode.anyGYPort))
+			sender.sendMessage(ChatColor.RED + "/dcgraveport [Number] [Playername] " + ChatColor.YELLOW + "teleports you to the grave of the player with the given number.");
 		return true;
 	}
 

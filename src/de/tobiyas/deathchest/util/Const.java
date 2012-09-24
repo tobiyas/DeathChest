@@ -15,5 +15,5 @@ public class Const {
 	
 	public static String spawnChestFile = DeathChest.getPlugin().getDataFolder() + File.separator + "spawnChestPos.yml";
 	
-	public static boolean oldBukkitVersion;
+	public static boolean oldBukkitVersion = false;
 }

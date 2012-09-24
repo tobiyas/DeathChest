@@ -1,10 +1,10 @@
 name: DeathChest
 main: de.tobiyas.deathchest.DeathChest
-version: 1.08
+version: 1.11
 website: http://dev.bukkit.org/server-mods/deathchest/
 author: Tobiyas
 depend:
-softdepend: [WorldGuard, LWC, Vault, PermissionsEx, GroupManager, PermissionsBukkit, SecureChests]
+softdepend: [WorldGuard, LWC, Vault, PermissionsEx, GroupManager, PermissionsBukkit, SecureChests, Transporter]
 
 
 description: >
@@ -39,4 +39,14 @@ commands:
     description: ports to actual DeathChest
     aliases: [dcp]
     usage: |
-           /dcport   
+           /dcport
+  dcremove:
+    description: removes DeathChest of Person in World.
+    aliases: [dcr]
+    usage: |
+           /dcremove <playerName> <WorldName>
+  dcgraveport:
+    description: ports yourself to the GraveYard-Sign of the given player
+    aliases: [dcgp]
+    usage: |
+           /dcgraveport number [PlayerName]

@@ -17,7 +17,7 @@ import org.bukkit.inventory.ItemStack;
 
 import de.tobiyas.deathchest.DeathChest;
 import de.tobiyas.deathchest.config.YamlConfigExtended;
-import de.tobiyas.deathchest.util.PlayerInventoryModificator;
+import de.tobiyas.deathchest.util.PlayerDropModificator;
 
 public class SpawnSign {
 	
@@ -26,8 +26,8 @@ public class SpawnSign {
 	private Location position;
 	private Location blockPosition;
 	
-	private String player;
-	private ArrayList<ItemStack> items;
+	private String playerName;
+	private List<ItemStack> items;
 	
 	private static int saveVal = 0;
 	
@@ -43,7 +43,8 @@ public class SpawnSign {
 	private boolean toRemove;
 	
 
-	public SpawnSign(Player player){
+	public SpawnSign(PlayerDropModificator piMod){
+		Player player = piMod.getPlayer();
 		plugin = DeathChest.getPlugin();
 		position = player.getLocation().getBlock().getLocation().clone();
 		
@@ -64,12 +65,14 @@ public class SpawnSign {
 		oldSignBlock = position.getBlock().getType().name();
 		oldSignBlockData = position.getBlock().getData();
 		
-		PlayerInventoryModificator mod = new PlayerInventoryModificator(player.getInventory(), player);
-		mod.modifyToConfig(true);
-		items = mod.getItemsAsList();
-		exp = player.getTotalExperience() * plugin.getConfigManager().getEXPMulti();
+		items = new LinkedList<ItemStack>();
+		for(ItemStack item : piMod.getTransferredItems())
+			items.add(item.clone());
 		
-		this.player = player.getName();
+		exp = piMod.getEXP() * plugin.getConfigManager().getEXPMulti();
+		piMod.removeAllEXP();
+		
+		this.playerName = player.getName();
 		ticksToDespawn = 60 * plugin.getConfigManager().getspawnSignDespawnTime();
 		toRemove = false;
 	}
@@ -88,7 +91,7 @@ public class SpawnSign {
 		blockPosition = position.clone();
 		blockPosition.setY(blockPosition.getY() - 1);
 		
-		player = config.getString("owner");
+		playerName = config.getString("owner");
 		exp = config.getDouble("exp", 0D);
 		
 		oldBlock = config.getString("oldblock");
@@ -114,7 +117,7 @@ public class SpawnSign {
 		
 		Sign sign = (Sign)position.getBlock().getState();
 		sign.setLine(0, ChatColor.RED + "[GraveStone]");
-		sign.setLine(1, player);
+		sign.setLine(1, playerName);
 		
 		List<String> message = RandomText.randomText();
 		String part1 = message.get(0);
@@ -124,11 +127,14 @@ public class SpawnSign {
 		sign.setLine(3, ChatColor.AQUA + part2);
 		sign.update();
 		
-		plugin.getProtectionManager().protectSign(position, player);
+		plugin.getProtectionManager().protectSign(position, playerName);
 		
 		return this;
 	}
 	
+	/**
+	 * Saves the Sign to the dataFolder
+	 */
 	public void saveSign(){
 		File file = new File(plugin.getDataFolder() + File.separator + "gravestones" + File.separator);
 		file.mkdirs();
@@ -139,7 +145,7 @@ public class SpawnSign {
 		config.set("signpos.z", position.getBlockZ());
 		config.set("signpos.world", position.getWorld().getName());
 		
-		config.set("owner", player);
+		config.set("owner", playerName);
 		
 		List<Byte> dataList = new LinkedList<Byte>();
 		dataList.add(oldBlockData);
@@ -164,6 +170,12 @@ public class SpawnSign {
 		config.save();
 	}
 	
+	/**
+	 * loads sign from the given Path
+	 * 
+	 * @param path, the file-System Path of the sign
+	 * @return the Sign-Object
+	 */
 	public static SpawnSign loadSign(String path){
 		try{
 			SpawnSign sign = new SpawnSign(new YamlConfigExtended(path));
@@ -190,9 +202,14 @@ public class SpawnSign {
 		return true;
 	}
 	
+	/**
+	 * if a player interacts with a sign
+	 * 
+	 * @param player
+	 */
 	public void interactSign(Player player){
 		if(player != null)
-			if(!(player.isOp() || player.getName().equalsIgnoreCase(this.player))) return;
+			if(!(player.isOp() || player.getName().equalsIgnoreCase(this.playerName))) return;
 		
 
 		for(ItemStack stack : items)
@@ -232,8 +249,8 @@ public class SpawnSign {
 		return position.equals(location);
 	}
 	
-	public LinkedList<ItemStack> getItems(){
-		LinkedList<ItemStack> stacks = new LinkedList<ItemStack>();
+	public List<ItemStack> getItems(){
+		List<ItemStack> stacks = new LinkedList<ItemStack>();
 		
 		for(ItemStack stack : items){
 			stacks.add(stack);
@@ -243,7 +260,7 @@ public class SpawnSign {
 	}
 	
 	public String getOwner(){
-		return player;
+		return playerName;
 	}
 	
 	public Location getLocation(){
@@ -261,7 +278,7 @@ public class SpawnSign {
 	}
 	
 	private void notifyPlayer(){
-		Player owner = Bukkit.getPlayer(player);
+		Player owner = Bukkit.getPlayer(playerName);
 		if(owner == null)
 			return;
 		

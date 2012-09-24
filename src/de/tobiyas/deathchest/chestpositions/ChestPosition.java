@@ -128,6 +128,8 @@ public class ChestPosition implements ChestContainer{
 		if(lightning) world.strikeLightningEffect(signLocation);
 		if(breakNaturaly) world.getBlockAt(signLocation).breakNaturally();
 		plugin.getProtectionManager().unprotectSign(signLocation);
+		
+		removeFromPosition(getLocation());
 	}
 	
 	public String getPlayerName(){

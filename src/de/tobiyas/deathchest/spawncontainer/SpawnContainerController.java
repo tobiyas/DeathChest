@@ -5,6 +5,7 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Location;
@@ -13,7 +14,12 @@ import org.bukkit.inventory.ItemStack;
 
 import de.tobiyas.deathchest.DeathChest;
 import de.tobiyas.deathchest.permissions.PermissionNode;
+import de.tobiyas.deathchest.util.PlayerDropModificator;
 
+/**
+ * @author Toby
+ *
+ */
 public class SpawnContainerController {
 
 	private ArrayList<SpawnSign> signs;
@@ -30,35 +36,48 @@ public class SpawnContainerController {
 		RandomText.createDefaults();
 	}
 	
-	public LinkedList<ItemStack> createSpawnContainer(Player player){
+	/**
+	 * Creates a new GraveYardSign / SpawnChest with the given {@link PlayerDropModificator}
+	 * 
+	 * @param piMod
+	 * @return the list of Items NOT saved
+	 */
+	public List<ItemStack> createSpawnContainer(PlayerDropModificator piMod){
+		Player player = piMod.getPlayer();
+		piMod.modifyForSpawnContainer();
 		if(!DeathChest.getPlugin().getPermissionsManager().checkPermissionsSilent(player, PermissionNode.spawnChest)){
-			return (new LinkedList<ItemStack>());
+			return (piMod.getTransferredItems());
 		}
 		
 		Class<?> clazz = plugin.getConfigManager().getSpawnContainerUsage();
 		
 		if(clazz == null)
-			return new LinkedList<ItemStack>();
+			return piMod.getTransferredItems();
 		
 		if(clazz.equals(SpawnChest.class))
-			return spawnChest(player);
+			return spawnChest(piMod);
 		
 		if(clazz.equals(SpawnSign.class))
-			return createSign(player);
+			return createSign(piMod);
 		
 		return null;
 	}
 	
-	private LinkedList<ItemStack> spawnChest(Player player){
-		LinkedList<ItemStack> stack = SpawnChest.placeSpawnChest(player);
-		if(!stack.isEmpty()){
+	private List<ItemStack> spawnChest(PlayerDropModificator piMod){
+		Player player = piMod.getPlayer();
+		List<ItemStack> notDropped = SpawnChest.placeSpawnChest(piMod);
+		if(notDropped.isEmpty()){
 			SpawnChest chest = new SpawnChest(player.getLocation().getBlock().getLocation());
 			chests.add(chest);
 		}
 		
-		return stack;
+		return notDropped;
 	}
 	
+	/**
+	 * Loads all GraveYardSigns saved in the Data-Path
+	 * 
+	 */
 	public void loadAllSigns(){
 		File file = new File(plugin.getDataFolder() + File.separator + "gravestones" + File.separator);
 		if(!file.exists()) return;
@@ -79,19 +98,39 @@ public class SpawnContainerController {
 			plugin.log("loaded " + signs.size() + " graves");
 	}
 	
+	
+	/**
+	 * Saves all GraveYardSigns to the Data-Path
+	 * 
+	 */
 	public void saveAllSigns(){
 		for(SpawnSign sign : signs)
 			sign.saveSign();
 	}
 	
-	public LinkedList<ItemStack> createSign(Player player){
-		SpawnSign sign = new SpawnSign(player).spawnSign();
+	
+	/**
+	 * Creates a new GraveYardSign with the given {@link PlayerDropModificator}
+	 * 
+	 * @param piMod
+	 * @return the List of Items NOT saved
+	 */
+	public List<ItemStack> createSign(PlayerDropModificator piMod){
+		Player player = piMod.getPlayer();
+		SpawnSign sign = new SpawnSign(piMod).spawnSign();
 		signs.add(sign);
 		if(plugin.getConfigManager().getEXPMulti() >= 0)
 			player.setTotalExperience(0);
-		return sign.getItems();
+		return new LinkedList<ItemStack>();
 	}
 	
+	/**
+	 * A player interacts with a Sign at a certain location
+	 * 
+	 * @param player, the interacting Player
+	 * @param location, the Location of the Block interacted with
+	 * @return true, if it worked
+	 */
 	public boolean interactSign(Player player, Location location){
 		for(SpawnSign sign : signs){
 			if(sign.isAt(location)){
@@ -104,15 +143,29 @@ public class SpawnContainerController {
 		return false;
 	}
 	
-	public static LinkedList<ItemStack> placeSpawnChestOnLocation(Player player){
-		return SpawnChest.placeSpawnChest(player);
+	
+	/**
+	 * Places a SpawnSign with the Attributes of the {@link PlayerDropModificator}
+	 * 
+	 * @param piMod
+	 * @return a list of Items not saved (all if it didn't work, empty if it worked)
+	 */
+	public static List<ItemStack> placeSpawnChestOnLocation(PlayerDropModificator piMod){
+		return SpawnChest.placeSpawnChest(piMod);
 	}
 
-	public Set<SpawnSign> getSpawnSigns(Player player) {
+	
+	/**
+	 * Returns all GraveStones of a Player with the given Name
+	 * 
+	 * @param playerName
+	 * @return Set<SpawnSign> of the given player (empty if he has none)
+	 */
+	public Set<SpawnSign> getSpawnSigns(String playerName) {
 		HashSet<SpawnSign> signSet = new HashSet<SpawnSign>();
 		
 		for(SpawnSign sign : signs){
-			if(sign.getOwner().equals(player.getName()))
+			if(sign.getOwner().equals(playerName))
 				signSet.add(sign);
 		}
 		
@@ -120,6 +173,36 @@ public class SpawnContainerController {
 	}
 	
 	
+	
+	/**
+	 * Gets the SpawnSign number X from Player Y
+	 * 
+	 * @param playerName
+	 * @param number
+	 * @return  (null if not found)
+	 */
+	public SpawnSign getSpawnSignNumberOf(String playerName, int number) {
+		HashSet<SpawnSign> signSet = new HashSet<SpawnSign>();
+		
+		for(SpawnSign sign : signs){
+			if(sign.getOwner().equals(playerName))
+				signSet.add(sign);
+		}
+		
+		int i = 0;
+		for(SpawnSign sign : signSet)
+			if(i == number)
+				return sign;
+			else
+				i++;
+		
+		return null;
+	}
+	
+	
+	/**
+	 * ticks all Signs for fading
+	 */
 	public void tick(){
 		if(signs != null && signs.size() > 0){
 			ArrayList<SpawnSign> tempSigns = new ArrayList<SpawnSign>();

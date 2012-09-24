@@ -7,7 +7,7 @@ import de.tobiyas.deathchest.DeathChest;
 import de.tobiyas.deathchest.util.protection.protectionplugins.Protector;
 import de.tobiyas.deathchest.util.protection.protectionplugins.ProtectorLWC;
 import de.tobiyas.deathchest.util.protection.protectionplugins.ProtectorLockette;
-import de.tobiyas.deathchest.util.protection.protectionplugins.ProtectorSecureChest;
+import de.tobiyas.deathchest.util.protection.protectionplugins.ProtectorSecureChests;
 
 public class ProtectionManager {
 
@@ -21,7 +21,7 @@ public class ProtectionManager {
 	
 	public void reloadManager(){
 		if(plugin.getConfigManager().getUseSecureChestInsteadOfLWC()){
-			protector = new ProtectorSecureChest();
+			protector = new ProtectorSecureChests();
 			return;
 		}
 		

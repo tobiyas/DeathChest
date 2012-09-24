@@ -23,7 +23,9 @@ import de.tobiyas.deathchest.commands.CommandExecutor_DCPermCheck;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCPort;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCReload;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCHelp;
+import de.tobiyas.deathchest.commands.CommandExecutor_DCRemove;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCVersion;
+import de.tobiyas.deathchest.commands.CommandExecutor_GYPort;
 import de.tobiyas.deathchest.commands.CommandExecutor_GYPos;
 import de.tobiyas.deathchest.config.ConfigManager;
 
@@ -32,6 +34,7 @@ import de.tobiyas.deathchest.listeners.Listener_Sign;
 import de.tobiyas.deathchest.spawncontainer.SpawnContainerController;
 import de.tobiyas.deathchest.util.BattleNightChecker;
 import de.tobiyas.deathchest.util.Const;
+import de.tobiyas.deathchest.util.PackageReloader;
 import de.tobiyas.deathchest.util.protection.ProtectionManager;
 import de.tobiyas.deathchest.util.updater.Restarter;
 import de.tobiyas.deathchest.util.updater.Updater;
@@ -75,7 +78,6 @@ public class DeathChest extends JavaPlugin{
 		Const.currentVersion = Double.parseDouble(split[0]);
 		Const.currentBuildVersion = Integer.parseInt(split[1]);
 		
-		Const.oldBukkitVersion = false;
 		if(!checkBukkitVersion()) Const.oldBukkitVersion = true;
 		
 		updater = new Updater(Const.updaterURL + "versions.html");
@@ -110,7 +112,7 @@ public class DeathChest extends JavaPlugin{
 			int buildVersion = Integer.parseInt(buildString);
 			
 			if(buildVersion < Const.leastBuild){
-				log("Bukkit version is to low. Plugin will work in low version Mode.");
+				log("Bukkit version is too low. Plugin will work in low version Mode.");
 				return false;
 			}
 		}catch(Exception e){
@@ -156,6 +158,8 @@ public class DeathChest extends JavaPlugin{
 		new CommandExecutor_DCPermCheck();
 		new CommandExecutor_GYPos();
 		new CommandExecutor_DCPort();
+		new CommandExecutor_DCRemove();
+		new CommandExecutor_GYPort();
 	}
 	
 	private void initBattleNight(){
@@ -220,8 +224,15 @@ public class DeathChest extends JavaPlugin{
 	/**
 	 * reloads the ChestContainer from files
 	 */
+	public void reloadChestContainer(ChestContainer container) {
+		cContainer = container;
+	}
+	
+	/**
+	 * reloads the ChestContainer from files
+	 */
 	public void reloadChestContainer() {
-		cContainer = ChestPackage.createALLPackages();
+		PackageReloader.reload();
 	}
 	
 	public SpawnContainerController interactSpawnContainerController(){

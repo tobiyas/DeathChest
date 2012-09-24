@@ -115,7 +115,6 @@ public class ChestPackage implements ChestContainer{
 		}
 	}
 	
-	
 	/**
 	 * Factory to construct all Packages
 	 * Returns the Package Construct
