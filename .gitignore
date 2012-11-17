@@ -2,3 +2,4 @@
 BACKUPGIT/
 bin/
 .git/
+target/
