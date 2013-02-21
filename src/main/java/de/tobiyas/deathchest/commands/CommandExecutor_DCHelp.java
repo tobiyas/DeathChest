@@ -15,9 +15,9 @@ public class CommandExecutor_DCHelp implements CommandExecutor {
 	public CommandExecutor_DCHelp(){
 		plugin = DeathChest.getPlugin();
 		try{
-			plugin.getCommand("dc").setExecutor(this);
+			plugin.getCommand("dchelp").setExecutor(this);
 		}catch(Exception e){
-			plugin.log("ERROR: Could not register command /dc.");
+			plugin.log("ERROR: Could not register command /dchelp.");
 		}
 	}
 

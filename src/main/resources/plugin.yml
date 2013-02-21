@@ -1,6 +1,6 @@
 name: DeathChest
 main: de.tobiyas.deathchest.DeathChest
-version: 1.11
+version: 1.12
 website: http://dev.bukkit.org/server-mods/deathchest/
 author: Tobiyas
 depend:
@@ -22,7 +22,7 @@ commands:
            /dcreload
   dchelp:
     description: help for DeathChest
-    aliases: [dc]
+    aliases: [deathchest]
     usage: |
            /dchelp
   dcpermcheck:

@@ -1,7 +1,6 @@
 package de.tobiyas.deathchest.util;
 
 import me.limebyte.battlenight.core.BattleNight;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -39,9 +38,7 @@ public class BattleNightChecker {
 			if(bPlugin == null || !bPlugin.isEnabled())
 				throw new NoClassDefFoundError();
 			
-			BattleNight battleNightPlugin = (BattleNight) bPlugin;
-			if(isPlayingBattleNight(battleNightPlugin, player) || 
-				isWatchingBattleNight(battleNightPlugin, player))
+			if(isPlayingBattleNight(player) || isWatchingBattleNight(player))
 				return true;
 			
 			return false;
@@ -54,13 +51,11 @@ public class BattleNightChecker {
 		}
 	}
 	
-	private boolean isPlayingBattleNight(BattleNight battleNight, Player player) {
-		if (battleNight == null) return false;
-		return battleNight.BattleUsersTeam.containsKey(player.getName());
+	private boolean isPlayingBattleNight(Player player) {
+		return BattleNight.getBattle().usersTeam.containsKey(player.getName());
 	}
 
-	private boolean isWatchingBattleNight(BattleNight battleNight, Player player) {
-		if (battleNight == null) return false;
-		return battleNight.BattleSpectators.containsKey(player.getName());
+	private boolean isWatchingBattleNight(Player player) {
+		return BattleNight.getBattle().spectators.contains(player.getName());
 	}
 }
