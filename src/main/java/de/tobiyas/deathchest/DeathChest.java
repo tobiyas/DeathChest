@@ -36,8 +36,6 @@ import de.tobiyas.deathchest.util.BattleNightChecker;
 import de.tobiyas.deathchest.util.Const;
 import de.tobiyas.deathchest.util.PackageReloader;
 import de.tobiyas.deathchest.util.protection.ProtectionManager;
-import de.tobiyas.deathchest.util.updater.Restarter;
-import de.tobiyas.deathchest.util.updater.Updater;
 import de.tobiyas.util.metrics.SendMetrics;
 import de.tobiyas.util.permissions.PermissionManager;
 
@@ -53,7 +51,6 @@ public class DeathChest extends JavaPlugin{
 	private ConfigManager cManager;
 	private PermissionManager pManager;
 	
-	private Updater updater;
 	private ChestContainer cContainer;
 	private static DeathChest plugin;
 	private SpawnContainerController spawnSignController;
@@ -79,8 +76,6 @@ public class DeathChest extends JavaPlugin{
 		Const.currentBuildVersion = Integer.parseInt(split[1]);
 		
 		if(!checkBukkitVersion()) Const.oldBukkitVersion = true;
-		
-		updater = new Updater(Const.updaterURL + "versions.html");
 		
 		cManager = new ConfigManager();
 		initPermissionManager();
@@ -120,21 +115,6 @@ public class DeathChest extends JavaPlugin{
 		}
 		
 		return true;
-	}
-	
-	/**
-	 * chesks if a new Version is available and downloads it
-	 */
-	private void checkPluginUpdates(){
-		if(!plugin.getConfigManager().checkRemindUpdate()) return;
-		
-		//Restarter restarter = new Restarter(this);
-		if(!updater.checkVersion(Const.currentVersion, Const.currentBuildVersion))
-			if(plugin.getConfigManager().checkUpdater()){
-				updater.forceDownload();
-				//reloadPlugin(restarter);   //not working
-			}
-		
 	}
 	
 	/**
@@ -179,11 +159,7 @@ public class DeathChest extends JavaPlugin{
 	
 	@Override
 	public void onDisable(){
-		interactSpawnContainerController().saveAllSigns();
-		try{
-			checkPluginUpdates();
-		}catch(NoClassDefFoundError e){}
-		
+		interactSpawnContainerController().saveAllSigns();		
 		log("disabled "+description.getFullName());
 	}
 	
@@ -247,16 +223,6 @@ public class DeathChest extends JavaPlugin{
 		if(bchecker == null) return false;
 		if(!bchecker.isActive()) return false;
 		return bchecker.checkForBattleNight(player);
-	}
-	
-	/**
-	 * lets the Plugin restart completly //not yet implemeted
-	 * @param restarter the Restarter Thread
-	 * 
-	 */
-	@SuppressWarnings("unused") //unused till bukkit allows plugin reload in plugins
-	private void reloadPlugin(Restarter restarter){
-		Bukkit.getScheduler().scheduleSyncDelayedTask(this, restarter, 1);
 	}
 
 }
