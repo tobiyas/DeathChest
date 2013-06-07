@@ -2,6 +2,7 @@ package de.tobiyas.deathchest.chestpositions;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public interface ChestContainer {
@@ -97,5 +98,14 @@ public interface ChestContainer {
 	 * @param player to check
 	 * @return the maximum amount of to transfer items
 	 */
-	public int getMaxTransferLimit(Player player);	
+	public int getMaxTransferLimit(Player player);
+	
+	
+	/**
+	 * Checks if the block is a special block of any DC
+	 * 
+	 * @param block
+	 * @return
+	 */
+	public boolean isChestOrSignOfDC(Block block);
 }

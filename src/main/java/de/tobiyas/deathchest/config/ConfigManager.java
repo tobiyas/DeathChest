@@ -1,6 +1,9 @@
 package de.tobiyas.deathchest.config;
 
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.bukkit.configuration.file.FileConfiguration;
 
 import de.tobiyas.deathchest.DeathChest;
@@ -37,6 +40,8 @@ public class ConfigManager {
 	private boolean useSecureChestInsteadOfLWC;
 	private boolean useLocketteInsteadOfLWC;
 	
+	private List<String> disableSpawnContainerInWorlds;
+	
 	
 	/**
 	 * Constructor creates a new Config and reloads it from the config file 
@@ -72,9 +77,13 @@ public class ConfigManager {
 		config.addDefault("plugin.General.checkForBattleNight", false);
 		
 		config.addDefault("plugin.General.useDeathSpawnType", "sign");
+		config.addDefault("plugin.General.useEXPOrbs", true);
+
+		List<String> tempList = new LinkedList<String>();
+		tempList.add("demoWorldToReplace");
+		config.addDefault("plugin.SpawnContainer.disableSpawnContainerInWorlds", tempList);
 		
 		config.addDefault("plugin.SpawnSign.EXPValue", 0.75D);
-		config.addDefault("plugin.General.useEXPOrbs", true);
 		config.addDefault("plugin.SpawnSign.LWCSignProtect", true);
 		config.addDefault("plugin.SpawnSign.despawnTimeInMin", 4320);
 		
@@ -114,6 +123,8 @@ public class ConfigManager {
 		
 		useSecureChestInsteadOfLWC = config.getBoolean("plugin.General.useSecureChestInsteadOfLWC", false);
 		useLocketteInsteadOfLWC = config.getBoolean("plugin.General.useLocketteInsteadOfLWC", false);
+		
+		disableSpawnContainerInWorlds = config.getStringList("plugin.SpawnContainer.disableSpawnContainerInWorlds");
 	}
 	
 	
@@ -227,5 +238,10 @@ public class ConfigManager {
 	
 	public boolean getUseOrbs(){
 		return useOrbs;
+	}
+
+
+	public List<String> getDisableSpawnContainerInWorlds() {
+		return disableSpawnContainerInWorlds;
 	}
 }

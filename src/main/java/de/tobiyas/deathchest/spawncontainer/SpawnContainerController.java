@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -45,6 +49,12 @@ public class SpawnContainerController {
 	public List<ItemStack> createSpawnContainer(PlayerDropModificator piMod){
 		Player player = piMod.getPlayer();
 		piMod.modifyForSpawnContainer();
+		
+		World world = piMod.getPlayer().getWorld();
+		if(worldIsOnIgnore(world)){
+			return piMod.getTransferredItems();
+		}
+		
 		if(!DeathChest.getPlugin().getPermissionsManager().checkPermissionsSilent(player, PermissionNode.spawnChest)){
 			return (piMod.getTransferredItems());
 		}
@@ -63,6 +73,18 @@ public class SpawnContainerController {
 		return null;
 	}
 	
+	private boolean worldIsOnIgnore(World world) {
+		String worldName = world.getName();
+		
+		for(String ignoreWorld : plugin.getConfigManager().getDisableSpawnContainerInWorlds()){
+			if(ignoreWorld.equals(worldName)){
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	private List<ItemStack> spawnChest(PlayerDropModificator piMod){
 		Player player = piMod.getPlayer();
 		List<ItemStack> notDropped = SpawnChest.placeSpawnChest(piMod);
@@ -231,5 +253,62 @@ public class SpawnContainerController {
 				chests.remove(remove);
 		}
 		
+	}
+
+	/**
+	 * Checks if one of the Signs saved is the passed block
+	 * 
+	 * @param block
+	 * @return
+	 */
+	public boolean isSpawnSign(Block block) {
+		if(block.getType().equals(Material.CHEST)){
+			
+			Block doubleChest = getDoubleChest(block);
+			for(SpawnChest chest : chests){
+				if(block.equals(doubleChest)){
+					return true;
+				}
+				
+				if(block.equals(chest.getLocation().getBlock())){
+					return true;
+				}
+			}			
+			
+		}
+		
+		if(block.getType().equals(Material.SIGN_POST)){
+			for(SpawnSign sign : signs){
+				if(sign.getLocation().getBlock().equals(block)){
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * gets the other block of a double chest.
+	 * Null if the chest is no double chest.
+	 * 
+	 * @param block
+	 * @return
+	 */
+	private Block getDoubleChest(Block chestLocation) {
+		List<Block> toCheck = new LinkedList<Block>();
+		
+		toCheck.add(chestLocation.getRelative(BlockFace.EAST));
+		toCheck.add(chestLocation.getRelative(BlockFace.WEST));
+		toCheck.add(chestLocation.getRelative(BlockFace.NORTH));
+		toCheck.add(chestLocation.getRelative(BlockFace.SOUTH));
+		
+		for(Block blockToCheck: toCheck){
+			if(blockToCheck.getType().equals(Material.CHEST)){
+				return blockToCheck;
+			}
+		}
+		
+		return null;
 	}
 }

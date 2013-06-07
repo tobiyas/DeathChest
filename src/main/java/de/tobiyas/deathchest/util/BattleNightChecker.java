@@ -1,5 +1,8 @@
 package de.tobiyas.deathchest.util;
 
+import java.util.List;
+
+import me.limebyte.battlenight.api.battle.Battle;
 import me.limebyte.battlenight.core.BattleNight;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -52,10 +55,22 @@ public class BattleNightChecker {
 	}
 	
 	private boolean isPlayingBattleNight(Player player) {
-		return BattleNight.getBattle().usersTeam.containsKey(player.getName());
+		List<Battle> battles = BattleNight.instance.getAPI().getBattleManager().getBattles();
+		for(Battle battle : battles){
+			if(battle.containsPlayer(player))
+				return true;
+		}
+		
+		return false;
 	}
 
 	private boolean isWatchingBattleNight(Player player) {
-		return BattleNight.getBattle().spectators.contains(player.getName());
+		List<Battle> battles = BattleNight.instance.getAPI().getBattleManager().getBattles();
+		for(Battle battle : battles){
+			if(battle.containsPlayer(player))
+				return true;
+		}
+		
+		return false;
 	}
 }

@@ -2,15 +2,19 @@ package de.tobiyas.deathchest.chestpositions;
 
 import java.io.File;
 import java.io.IOException;
-
-import de.tobiyas.deathchest.DeathChest;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+
+import de.tobiyas.deathchest.DeathChest;
 
 
 /**
@@ -260,6 +264,63 @@ public class ChestPosition implements ChestContainer{
 		}
 		
 		return true;
+	}
+
+	@Override
+	public boolean isChestOrSignOfDC(Block block) {
+		if(block.equals(this.chestLocation.getBlock())){
+			return true;
+		}
+		
+		if(block.equals(this.signLocation.getBlock())){
+			return true;
+		}
+		
+		Block attachedSignBlock = getBlockAttachedToSign();
+		if(attachedSignBlock != null && block.equals(attachedSignBlock)){
+			return true;
+		}
+		
+		Block doubleChestBlock = getDoubleChest();
+		if(doubleChestBlock != null && block.equals(doubleChestBlock)){
+			return true;
+		}
+			
+		return false;
+	}
+
+
+	private Block getBlockAttachedToSign() {
+		if(!signLocation.getBlock().getType().equals(Material.WALL_SIGN)){
+			return null;
+		}
+		
+		org.bukkit.material.Sign sign = (org.bukkit.material.Sign) signLocation.getBlock().getState().getData();
+		return signLocation.getBlock().getRelative(sign.getAttachedFace());
+	}
+
+	/**
+	 * gets the other block of a double chest.
+	 * Null if the chest is no double chest.
+	 * 
+	 * @param block
+	 * @return
+	 */
+	private Block getDoubleChest() {
+		List<Block> toCheck = new LinkedList<Block>();
+		
+		toCheck.add(chestLocation.getBlock().getRelative(BlockFace.EAST));
+		toCheck.add(chestLocation.getBlock().getRelative(BlockFace.WEST));
+		toCheck.add(chestLocation.getBlock().getRelative(BlockFace.NORTH));
+		toCheck.add(chestLocation.getBlock().getRelative(BlockFace.SOUTH));
+		
+		for(Block blockToCheck: toCheck){
+			if(blockToCheck.getType().equals(Material.CHEST)){
+				return blockToCheck;
+			}
+		}
+		
+		return null;
 	}
 	
 }

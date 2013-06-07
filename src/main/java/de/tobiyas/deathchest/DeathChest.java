@@ -30,6 +30,7 @@ import de.tobiyas.deathchest.commands.CommandExecutor_GYPos;
 import de.tobiyas.deathchest.config.ConfigManager;
 
 import de.tobiyas.deathchest.listeners.Listener_Entity;
+import de.tobiyas.deathchest.listeners.Listener_Explosion;
 import de.tobiyas.deathchest.listeners.Listener_Sign;
 import de.tobiyas.deathchest.spawncontainer.SpawnContainerController;
 import de.tobiyas.deathchest.util.BattleNightChecker;
@@ -126,6 +127,9 @@ public class DeathChest extends JavaPlugin{
 		
 		Listener_Sign listenerSign = new Listener_Sign(this);
 		getServer().getPluginManager().registerEvents(listenerSign, this);
+		
+		Listener_Explosion listnerExplosion = new Listener_Explosion(this);
+		getServer().getPluginManager().registerEvents(listnerExplosion, this);
 	}
 	
 	/**

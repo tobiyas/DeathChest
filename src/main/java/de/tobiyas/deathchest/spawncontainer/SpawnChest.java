@@ -82,7 +82,7 @@ public class SpawnChest {
 		if(!config.getValidLoad())
 			return chests;
 		
-		for(String chest : config.getYAMLChildren("chests")){
+		for(String chest : config.getChildren("chests")){
 			Location tempLoc = config.getLocation("chests." + chest + ".loc");
 			int tempTime = config.getInt("chests." + chest + ".despawn");
 			
@@ -244,7 +244,7 @@ public class SpawnChest {
 	 * @param block
 	 * @return Block the other ChestBlock
 	 */
-	private static Block getDoubleChest(Block block){
+	public static Block getDoubleChest(Block block){
 		if(block.getType() != Material.CHEST) return null;
 		
 		Block chestBlock;
@@ -262,6 +262,10 @@ public class SpawnChest {
 		if(chestBlock.getType() == Material.CHEST) return chestBlock;
 		
 		return null;
+	}
+
+	public Location getLocation() {
+		return loc;
 	}
 
 }

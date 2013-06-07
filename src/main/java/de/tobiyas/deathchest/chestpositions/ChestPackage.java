@@ -9,6 +9,7 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -295,6 +296,17 @@ public class ChestPackage implements ChestContainer{
 	@Override
 	public boolean checkPlayerHasChest(World world, String player) {
 		return (getChestOfPlayer(world, player) != null);
+	}
+
+
+
+	@Override
+	public boolean isChestOrSignOfDC(Block block) {
+		for(ChestContainer container : packageContainer){
+			if(container.isChestOrSignOfDC(block)) return true;
+		}
+		
+		return false;
 	}
 
 }
