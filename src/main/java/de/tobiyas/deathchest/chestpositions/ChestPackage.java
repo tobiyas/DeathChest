@@ -19,7 +19,7 @@ import de.tobiyas.deathchest.DeathChest;
 public class ChestPackage implements ChestContainer{
 
 	private LinkedList<ChestContainer> packageContainer;
-	private LinkedList<World> worldList;
+	private LinkedList<String> worldList;
 	private boolean isControler;
 	private PackageConfig pConfig;
 	
@@ -28,7 +28,7 @@ public class ChestPackage implements ChestContainer{
 	private YamlConfiguration packageParser;
 	
 	private static DeathChest plugin;
-	private static LinkedList<World> allWorlds;
+	private static LinkedList<String> allWorlds;
 	
 	
 	/**
@@ -42,14 +42,12 @@ public class ChestPackage implements ChestContainer{
 		this.packageName = packageName;
 		isControler = false;
 		packageContainer = new LinkedList<ChestContainer>();
-		worldList = new LinkedList<World>();
+		worldList = new LinkedList<String>();
 				
 		for(String worldString : worlds){
-			World world = Bukkit.getWorld(worldString);
-			if(world == null) continue;
-			if(allWorlds.contains(world)) plugin.log("ERROR in Settings! World: " + worldString + " is in more than 1 Package.");
-			allWorlds.add(world);
-			worldList.add(world);
+			if(allWorlds.contains(worldString)) plugin.log("ERROR in Settings! World: " + worldString + " is in more than 1 Package.");
+			allWorlds.add(worldString);
+			worldList.add(worldString);
 		}
 		
 		String packagePath = plugin.getDataFolder() + File.separator + "packages" + File.separator + packageName + ".yml";
@@ -192,7 +190,7 @@ public class ChestPackage implements ChestContainer{
 	
 	@Override
 	public boolean hasWorld(World world){
-		return worldList.contains(world);
+		return worldList.contains(world.getName());
 	}
 
 
@@ -200,7 +198,7 @@ public class ChestPackage implements ChestContainer{
 	public ChestContainer removeFromPosition(Location location) {
 		World world = location.getWorld();
 		if(!isControler)
-			if(!worldList.contains(world)) 
+			if(!worldList.contains(world.getName())) 
 				return null;
 		
 		for(ChestContainer container : packageContainer){
@@ -224,7 +222,7 @@ public class ChestPackage implements ChestContainer{
 				if(container.worldSupported(world)) return true;
 			}
 		}else{
-			if(worldList.contains(world)) return true;
+			if(worldList.contains(world.getName())) return true;
 		}
 		return false;
 	}
@@ -239,7 +237,7 @@ public class ChestPackage implements ChestContainer{
 				if(containerMaxLimit > 0) return containerMaxLimit;
 			}
 		}else 
-			if(worldList.contains(world)) return pConfig.getMaxTrandferredItems(player);
+			if(worldList.contains(world.getName())) return pConfig.getMaxTrandferredItems(player);
 			
 		return -1;
 	}
@@ -256,7 +254,7 @@ public class ChestPackage implements ChestContainer{
 			}
 			return null;
 		}else{
-			if(!worldList.contains(world)) return null;
+			if(!worldList.contains(world.getName())) return null;
 			for(ChestContainer container : packageContainer){
 				ChestContainer deathChestPosition = container.getChestOfPlayer(world, player);
 				if(deathChestPosition != null) return deathChestPosition;
@@ -276,7 +274,7 @@ public class ChestPackage implements ChestContainer{
 				if(container.addChestToPlayer(location, player)) return true;
 			}
 		}else{
-			if(!worldList.contains(location.getWorld())) return false;
+			if(!worldList.contains(location.getWorld().getName())) return false;
 			if(!checkPlayerHasChest(location.getWorld(), player)){
 				ChestContainer container = new ChestPosition(packageParser, packageName, player, location);
 				packageContainer.add(container);
