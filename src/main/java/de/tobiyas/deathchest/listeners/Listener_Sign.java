@@ -50,8 +50,8 @@ public class Listener_Sign implements Listener {
 			return;
 		}
 		
-		if(!plugin.getPermissionsManager().checkPermissionsSilent(player, PermissionNode.createDeathChest) && 
-			!plugin.getPermissionsManager().checkPermissionsSilent(player, PermissionNode.simpleUse)){
+		if(!plugin.getPermissionManager().checkPermissionsSilent(player, PermissionNode.createDeathChest) && 
+			!plugin.getPermissionManager().checkPermissionsSilent(player, PermissionNode.simpleUse)){
 			player.sendMessage(ChatColor.RED + "You don't have Permissions to set a DeathChest.");
 			return;
 		}
@@ -111,7 +111,7 @@ public class Listener_Sign implements Listener {
 		if(possiblePlayer.length() == 0 || possiblePlayer.toLowerCase().contains("deathchest"))
 			return orgPlayer;
 		
-		if(!plugin.getPermissionsManager().checkPermissions(player, PermissionNode.otherChestCreate)) 
+		if(!plugin.getPermissionManager().checkPermissions(player, PermissionNode.otherChestCreate)) 
 			return orgPlayer;
 		
 		if(Bukkit.getServer().getOfflinePlayer(possiblePlayer) == null)

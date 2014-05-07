@@ -36,7 +36,7 @@ public class CommandExecutor_DCPort implements CommandExecutor {
 			return true;
 		}
 		
-		if(!plugin.getPermissionsManager().checkPermissions(sender, PermissionNode.portToDeathChest))
+		if(!plugin.getPermissionManager().checkPermissions(sender, PermissionNode.portToDeathChest))
 			return true;
 		
 		Player player = (Player) sender;

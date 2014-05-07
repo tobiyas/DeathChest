@@ -128,12 +128,15 @@ public class SpawnChest {
 		Player player = piMod.getPlayer();
 		Location location = player.getLocation();
 		
-		if(!DeathChest.getPlugin().getPermissionsManager().checkPermissionsSilent(player, PermissionNode.spawnChest)) 
+		if(!DeathChest.getPlugin().getPermissionManager().checkPermissionsSilent(player, PermissionNode.spawnChest)) 
 			return piMod.getTransferredItems();
 		
-		if(!location.getBlock().getType().equals(Material.AIR)){
-			location = getNextFreeBlock(location);
-			if(location == null){
+		Location[] buildLocation = new Location[]{location};
+		
+		if(!location.getBlock().getType().equals(Material.AIR) || piMod.getALLItemsAsList().size() > 3*9){
+			boolean useDoubleChest = piMod.getALLItemsAsList().size() > 3*9;
+			buildLocation = getNextFreeBlock(location, useDoubleChest);
+			if(buildLocation == null){
 				player.sendMessage(ChatColor.RED + "The Block is blocked. It will not be replaced. Your stuff is dropped at your death location.");
 				return piMod.getTransferredItems();
 			}
@@ -143,23 +146,28 @@ public class SpawnChest {
 			try{
 				WorldGuardPlugin wgPlugin = (WorldGuardPlugin) Bukkit.getPluginManager().getPlugin("WorldGuard");
 				if(wgPlugin == null) throw new Exception();
-				if(!wgPlugin.canBuild(player, location)) return piMod.getTransferredItems();
+				for(Location wgLocation : buildLocation){
+					if(!wgPlugin.canBuild(player, wgLocation)) return piMod.getTransferredItems();
+				}
 			}catch(Exception e){
 				DeathChest.getPlugin().log("Error at check of WorldGuard. WorldGuard not Active. Deactivate WorldGuard-Options in Config!");
 				DeathChest.getPlugin().getConfigManager().tempTurnOffWG();
 			}
 		}
 		
+		
 		List<ItemStack> notDropped = new LinkedList<ItemStack>();
 		
 		if(DeathChest.getPlugin().getConfigManager().checkIfChestInInv()){
 			boolean chestFound = false;
+			int searchedAmount = piMod.getALLItemsAsList().size() > 3*9 ? 2 : 1;
+			
 			for(ItemStack item : piMod.getTransferredItems()){
 				if(item.getType() == Material.CHEST){
-					if(item.getAmount() == 1)
+					if(item.getAmount() == searchedAmount)
 						item.setType(Material.AIR);
 					else
-						item.setAmount(item.getAmount() - 1);
+						item.setAmount(item.getAmount() - searchedAmount);
 					chestFound = true;
 					break;
 				}
@@ -170,18 +178,24 @@ public class SpawnChest {
 			}
 		}
 		
-		location.getBlock().setType(Material.CHEST);
-		notDropped.addAll(copyInventoryToChest((Chest)location.getBlock().getState(), piMod));
 		
-		if(notDropped.isEmpty()) 
-			DeathChest.getPlugin().getProtectionManager().protectChest(location, player.getName());
+		for(Location chestLocation : buildLocation){
+			chestLocation.getBlock().setType(Material.CHEST);
+		}
 		
+		notDropped.addAll(copyInventoryToChest((Chest) buildLocation[0].getBlock().getState(), piMod));
+		
+		if(notDropped.isEmpty()){
+			DeathChest.getPlugin().getProtectionManager().protectChest(buildLocation[0], player.getName());
+		}
+			
 		
 		player.sendMessage(ChatColor.GREEN + "Your Inventory has been saved to a Chest on your Death-Position.");
 		return notDropped;
 	}
 	
-	private static Location getNextFreeBlock(Location location){
+	
+	private static Location[] getNextFreeBlock(Location location, boolean checkForDoubleChest){
 		Location tempLocation;
 		for(int i = -1; i < 2; i++){
 			for(int j = -1; j < 2; j++){
@@ -191,7 +205,23 @@ public class SpawnChest {
 					tempLocation.setY(tempLocation.getY() + j);
 					tempLocation.setZ(tempLocation.getZ() + k);
 					
-					if(tempLocation.getBlock().getType().equals(Material.AIR)) return tempLocation;
+					if(tempLocation.getBlock().getType().equals(Material.AIR)){
+						if(checkForDoubleChest){
+							Location[] locations = new Location[]{tempLocation, tempLocation.getBlock().getRelative(BlockFace.NORTH).getLocation()};
+							if(tempLocation.getBlock().getRelative(BlockFace.NORTH).getType() == Material.AIR) return locations;
+							
+							locations = new Location[]{tempLocation, tempLocation.getBlock().getRelative(BlockFace.EAST).getLocation()};
+							if(tempLocation.getBlock().getRelative(BlockFace.EAST).getType() == Material.AIR) return locations;
+							
+							locations = new Location[]{tempLocation, tempLocation.getBlock().getRelative(BlockFace.SOUTH).getLocation()};
+							if(tempLocation.getBlock().getRelative(BlockFace.SOUTH).getType() == Material.AIR) return locations;
+							
+							locations = new Location[]{tempLocation, tempLocation.getBlock().getRelative(BlockFace.WEST).getLocation()};
+							if(tempLocation.getBlock().getRelative(BlockFace.WEST).getType() == Material.AIR) return locations;
+						}else{
+							return new Location[]{tempLocation};
+						}
+					}
 				}
 			}
 		}
@@ -210,7 +240,7 @@ public class SpawnChest {
 		Inventory chestInv = chest.getInventory();
 		
 		Block doubleChestBlock = getDoubleChest(chest.getBlock());
-		boolean isDoubleChest = !(doubleChestBlock == null);
+		boolean isDoubleChest = doubleChestBlock != null;
 		
 		LinkedList<ItemStack> notDropped = new LinkedList<ItemStack>();
 		

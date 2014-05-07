@@ -30,7 +30,7 @@ public class CommandExecutor_DCRemove implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command,
 			String label, String[] args) {
 		
-		if(!plugin.getPermissionsManager().checkPermissions(sender, PermissionNode.removeChest))
+		if(!plugin.getPermissionManager().checkPermissions(sender, PermissionNode.removeChest))
 			return true;
 		
 		World world = null;

@@ -22,4 +22,6 @@ public class PermissionNode {
 	
 	public static final String[] anyGYPort = new String[]{teleportOwnGYS, teleportOtherGYS};
 	public static final String[] simpleUseArray = new String[]{simpleUse, saveToDeathChest};
+	
+	public static final String[] anySavingFeatures = new String[]{simpleUse, saveToDeathChest, spawnChest};
 }

@@ -44,17 +44,17 @@ public class CommandExecutor_DCPermCheck implements CommandExecutor{
 		String[] buildPerms = new String[]
 				{PermissionNode.createDeathChest, 
 				PermissionNode.simpleUse};
-		boolean build = plugin.getPermissionsManager().hasAnyPermissionSilent(sender, buildPerms);
+		boolean build = plugin.getPermissionManager().hasAnyPermissionSilent(sender, buildPerms);
 		player.sendMessage(ChatColor.BLUE + "Build DeathChest:                " + parseBool(build) + build);
 		
-		boolean saveDC = plugin.getPermissionsManager().checkPermissionsSilent(player, PermissionNode.saveToDeathChest) ||
-				plugin.getPermissionsManager().checkPermissionsSilent(player, PermissionNode.simpleUse);
+		boolean saveDC = plugin.getPermissionManager().checkPermissionsSilent(player, PermissionNode.saveToDeathChest) ||
+				plugin.getPermissionManager().checkPermissionsSilent(player, PermissionNode.simpleUse);
 		player.sendMessage(ChatColor.BLUE + "Save to DeathChest:            " + parseBool(saveDC) + saveDC);
 		
-		boolean saveSC = plugin.getPermissionsManager().checkPermissionsSilent(player, PermissionNode.spawnChest);
+		boolean saveSC = plugin.getPermissionManager().checkPermissionsSilent(player, PermissionNode.spawnChest);
 		player.sendMessage(ChatColor.BLUE + "Spawn SpawnChest on Death:  " + parseBool(saveSC) + saveSC);
 		
-		boolean reloadConfig = plugin.getPermissionsManager().checkPermissionsSilent(player, PermissionNode.reloadConfig);
+		boolean reloadConfig = plugin.getPermissionManager().checkPermissionsSilent(player, PermissionNode.reloadConfig);
 		player.sendMessage(ChatColor.BLUE + "Reload Config:                    " + parseBool(reloadConfig) + reloadConfig);
 		
 		player.sendMessage(ChatColor.YELLOW + "====World-Settings: \"" + player.getWorld().getName() + "\"===");

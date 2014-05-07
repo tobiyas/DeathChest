@@ -1,6 +1,6 @@
 name: DeathChest
 main: de.tobiyas.deathchest.DeathChest
-version: 1.12
+version: '1.13.3'
 website: http://dev.bukkit.org/server-mods/deathchest/
 author: Tobiyas
 depend:
@@ -9,6 +9,54 @@ softdepend: [WorldGuard, LWC, Vault, PermissionsEx, GroupManager, PermissionsBuk
 
 description: >
              Fills a chest with your stuff, if you die.
+
+permissions:
+  deathchest.*:
+    description: Gives access to all DeathChest commands
+    children:
+      deathchest.signchest.use: true
+      deathchest.signchest.port: true
+      deathchest.spawnchest.spawn: true
+      deathchest.commands.reload: true
+      deathchest.commands.remove: true
+      deathchest.gy.view.other: true
+      deathchest.gy.port.*: true
+  deathchest.signchest.create.own:
+    description: Gives acces to creating own DC
+  deathchest.signchest.create.other:
+    description: Gives acces to creating own DC
+  deathchest.signchest.create.*:
+    description: Gives acces to creating own and other DC
+    children:
+      deathchest.signchest.create.own: true
+      deathchest.signchest.create.other: true
+  deathchest.signchest.saveto:
+    description: Gives acces to saving to own DC
+  deathchest.signchest.use:
+    description: Gives acces to all using for DC
+    children:
+      deathchest.signchest.create.*: true
+      deathchest.signchest.saveto: true
+  deathchest.signchest.port:
+    description: Gives acces to porting to own DC
+  deathchest.spawnchest.spawn:
+    description: Gives acces to spawning a chest upon death
+  deathchest.commands.reload:
+    description: Gives acces to the /dcreload command
+  deathchest.commands.remove:
+    description: Gives acces to the /dcremove command
+  deathchest.gy.view.other:
+    description: Gives acces to viewing other's graveyard
+  deathchest.gy.port.own:
+    description: Gives acces to porting to own graveyard
+  deathchest.gy.port.other:
+    description: Gives acces to porting to other's graveyard
+  deathchest.gy.port.*:
+    description: Gives acces to porting to other's graveyard
+    children:
+      deathchest.gy.port.own: true
+      deathchest.gy.port.other: true  
+
 commands:
   dcversion:
     description: displays the Version of DeathChest

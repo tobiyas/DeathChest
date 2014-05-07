@@ -25,8 +25,11 @@ public class CommandExecutor_DCVersion implements CommandExecutor{
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label,
 			String[] args) {
-		sender.sendMessage(ChatColor.YELLOW + "Current DeathChest version: " + Const.currentVersion + "_" + Const.currentBuildVersion);
-		sender.sendMessage(ChatColor.YELLOW + "Working with Permission-System: " + plugin.getPermissionsManager().getPermissionsName());
+		
+		
+		sender.sendMessage(ChatColor.YELLOW + "Current DeathChest version: " + Const.currentVersion + "_" + Const.currentBuildVersion 
+				+ " Rev: " + Const.currentRevOfBuild);
+		sender.sendMessage(ChatColor.YELLOW + "Working with Permission-System: " + plugin.getPermissionManager().getPermissionsName());
 		
 		return true;
 	}

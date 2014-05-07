@@ -142,7 +142,7 @@ public class SaveToContainer {
 	}
 	
 	private static boolean simplePermissionUse(Player player){
-		return plugin.getPermissionsManager().hasAnyPermissionSilent(player, PermissionNode.simpleUseArray);
+		return plugin.getPermissionManager().hasAnyPermissionSilent(player, PermissionNode.simpleUseArray);
 	}
 
 }

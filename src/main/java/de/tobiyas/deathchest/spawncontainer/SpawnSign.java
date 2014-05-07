@@ -206,14 +206,17 @@ public class SpawnSign {
 	 * if a player interacts with a sign
 	 * 
 	 * @param player
+	 * @return if the sign was used.
 	 */
-	public void interactSign(Player player){
-		if(player != null)
-			if(!(player.isOp() || player.getName().equalsIgnoreCase(this.playerName))) return;
+	public boolean interactSign(Player player){
+		if(player != null){
+			if(!(player.isOp() || player.getName().equalsIgnoreCase(this.playerName))) return false;
+		}
 		
 
-		for(ItemStack stack : items)
+		for(ItemStack stack : items){
 			position.getWorld().dropItemNaturally(position, stack);
+		}
 	
 		boolean useOrbs = plugin.getConfigManager().getUseOrbs();
 		if(useOrbs || player == null){
@@ -243,6 +246,7 @@ public class SpawnSign {
 		blockPosition.getBlock().setData(oldBlockData);
 		
 		plugin.getProtectionManager().unprotectSign(position);
+		return true;
 	}
 
 	public boolean isAt(Location location) {

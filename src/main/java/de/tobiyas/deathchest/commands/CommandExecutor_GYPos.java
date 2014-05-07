@@ -52,7 +52,7 @@ public class CommandExecutor_GYPos implements CommandExecutor{
 		}
 		
 		if(args.length == 1){
-			if(!plugin.getPermissionsManager().checkPermissionsSilent(sender, PermissionNode.viewOtherGYS)){
+			if(!plugin.getPermissionManager().checkPermissionsSilent(sender, PermissionNode.viewOtherGYS)){
 				sender.sendMessage(ChatColor.RED + "You don't have the Permissions to view the GraveYards of others!");
 				return true;
 			}

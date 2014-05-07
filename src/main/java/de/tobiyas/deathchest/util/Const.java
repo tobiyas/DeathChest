@@ -11,6 +11,7 @@ public class Const {
 	
 	public static double currentVersion;
 	public static int currentBuildVersion;
+	public static int currentRevOfBuild;
 	
 	public static String spawnChestFile = DeathChest.getPlugin().getDataFolder() + File.separator + "spawnChestPos.yml";
 	

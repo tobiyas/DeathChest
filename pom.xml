@@ -2,9 +2,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.tobiyas</groupId>
   <artifactId>DeathChest</artifactId>
-  <version>1.12.1-SNAPSHOT</version>
+  <version>1.13.3-SNAPSHOT</version>
   <name>DeathChest</name>
   
+  <properties>
+      <utilsVersion>1.0.11</utilsVersion>
+	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   
   <repositories>
   	<repository>
@@ -27,18 +31,18 @@
   	<dependency>
   		<groupId>com.sk89q</groupId>
   		<artifactId>worldguard</artifactId>
-  		<version>5.7-SNAPSHOT</version>
+  		<version>5.7.3-SNAPSHOT</version>
   		<optional>true</optional>
   	</dependency>
   	<dependency>
   		<groupId>de.tobiyas</groupId>
   		<artifactId>Utils</artifactId>
-  		<version>1.0.6-SNAPSHOT</version>
+  		<version>${utilsVersion}</version>
   	</dependency>
   	<dependency>
   		<groupId>org.bukkit</groupId>
   		<artifactId>bukkit</artifactId>
-  		<version>1.5.2-R0.2-SNAPSHOT</version>
+  		<version>1.7.2-R0.1-SNAPSHOT</version>
   		<optional>true</optional>
   	</dependency>
   	
@@ -79,9 +83,6 @@
     	<optional>true</optional>
   	</dependency>
   </dependencies>
-  <properties>
-  	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
   
  <build>
    <sourceDirectory>src/main/java</sourceDirectory>
@@ -115,6 +116,15 @@
                   <include>de.tobiyas:Utils</include>
                 </includes>
               </artifactSet>
+              
+              <!-- We want to relocate the Utils -->
+              <relocations>
+                  <relocation>
+                      <pattern>de.tobiyas.util</pattern>
+                      <shadedPattern>de.tobiyas.util.v${utilsVersion}</shadedPattern>
+                  </relocation>
+              </relocations>
+            
             </configuration>
           </execution>
         </executions>

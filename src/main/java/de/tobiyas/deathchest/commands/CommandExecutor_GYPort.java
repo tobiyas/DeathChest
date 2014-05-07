@@ -38,11 +38,11 @@ public class CommandExecutor_GYPort implements CommandExecutor {
 		String playerName = player.getName();
 		
 		if(args.length == 2){
-			if(!plugin.getPermissionsManager().checkPermissions(sender, PermissionNode.teleportOtherGYS))
+			if(!plugin.getPermissionManager().checkPermissions(sender, PermissionNode.teleportOtherGYS))
 				return true;
 			playerName = args[1];
 		}else{
-			if(!plugin.getPermissionsManager().checkPermissions(sender, PermissionNode.teleportOwnGYS))
+			if(!plugin.getPermissionManager().checkPermissions(sender, PermissionNode.teleportOwnGYS))
 				return true;
 		}
 		

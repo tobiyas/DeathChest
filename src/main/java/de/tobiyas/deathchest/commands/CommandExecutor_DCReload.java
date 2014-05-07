@@ -29,9 +29,9 @@ public class CommandExecutor_DCReload implements CommandExecutor{
 			String[] args) {
 		if (command.getName().equalsIgnoreCase("dcreload")) {
 			if(sender instanceof Player){
-				if(!plugin.getPermissionsManager().checkPermissions(sender, PermissionNode.reloadConfig)) return true;
+				if(!plugin.getPermissionManager().checkPermissions(sender, PermissionNode.reloadConfig)) return true;
 			}else
-			 if(!plugin.getPermissionsManager().checkPermissions(sender, PermissionNode.reloadConfig)) return true;
+			 if(!plugin.getPermissionManager().checkPermissions(sender, PermissionNode.reloadConfig)) return true;
 			
 			plugin.getConfigManager().reloadConfig();
 			plugin.reloadChestContainer();

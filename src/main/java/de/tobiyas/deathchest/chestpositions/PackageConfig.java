@@ -32,7 +32,7 @@ public class PackageConfig {
 		if(maxTransferredItemsDefault == defaultMax) 
 			config.set("config.maxTransferredItems.default", "");
 		
-		for(String group : plugin.getPermissionsManager().getAllGroups()){
+		for(String group : plugin.getPermissionManager().getAllGroups()){
 			int groupMax = config.getInt("config.maxTransferredItems." + group ,maxTransferredItemsDefault);
 			if(groupMax == maxTransferredItemsDefault)
 				config.set("config.maxTransferredItems." + group, "");
@@ -55,7 +55,7 @@ public class PackageConfig {
 		int playerTransferLimit;
 		
 		try{
-			String playerGroup = plugin.getPermissionsManager().getGroupOfPlayer(player);
+			String playerGroup = plugin.getPermissionManager().getGroupOfPlayer(player);
 			
 			playerTransferLimit = groupMap.get(playerGroup);
 		}catch(Exception e){

@@ -29,14 +29,14 @@ public class CommandExecutor_DCHelp implements CommandExecutor {
 		sender.sendMessage(ChatColor.BLUE + "Commands:");
 		sender.sendMessage(ChatColor.RED + "/dcversion" + ChatColor.YELLOW + " Displays the Version of DC.");
 		sender.sendMessage(ChatColor.RED + "/dcpermcheck" + ChatColor.YELLOW + " checks which Permissions you got.");
-		if(plugin.getPermissionsManager().checkPermissionsSilent(sender, PermissionNode.reloadConfig))
+		if(plugin.getPermissionManager().checkPermissionsSilent(sender, PermissionNode.reloadConfig))
 			sender.sendMessage(ChatColor.RED + "/dcreload" + ChatColor.YELLOW + " Reloads the Config of DC.");
-		if(plugin.getPermissionsManager().checkPermissionsSilent(sender, PermissionNode.portToDeathChest))
+		if(plugin.getPermissionManager().checkPermissionsSilent(sender, PermissionNode.portToDeathChest))
 			sender.sendMessage(ChatColor.RED + "/dcport" + ChatColor.YELLOW + " teleports you to your DeathChest.");
-		if(plugin.getPermissionsManager().checkPermissionsSilent(sender, PermissionNode.removeChest))
+		if(plugin.getPermissionManager().checkPermissionsSilent(sender, PermissionNode.removeChest))
 			sender.sendMessage(ChatColor.RED + "/dcremove [WorldName] [PlayerName] " + ChatColor.YELLOW + "removes DeathChest of Player from World.");
 		sender.sendMessage(ChatColor.RED + "/dcgravelist [PlayerName]" + ChatColor.YELLOW + " lists the Position of all your/PlayerName's GraveYard signs.");
-		if(plugin.getPermissionsManager().hasAnyPermissions(sender, PermissionNode.anyGYPort))
+		if(plugin.getPermissionManager().hasAnyPermissions(sender, PermissionNode.anyGYPort))
 			sender.sendMessage(ChatColor.RED + "/dcgraveport [Number] [Playername] " + ChatColor.YELLOW + "teleports you to the grave of the player with the given number.");
 		return true;
 	}

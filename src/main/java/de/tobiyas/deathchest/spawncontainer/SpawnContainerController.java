@@ -55,20 +55,23 @@ public class SpawnContainerController {
 			return piMod.getTransferredItems();
 		}
 		
-		if(!DeathChest.getPlugin().getPermissionsManager().checkPermissionsSilent(player, PermissionNode.spawnChest)){
+		if(!DeathChest.getPlugin().getPermissionManager().checkPermissionsSilent(player, PermissionNode.spawnChest)){
 			return (piMod.getTransferredItems());
 		}
 		
 		Class<?> clazz = plugin.getConfigManager().getSpawnContainerUsage();
 		
-		if(clazz == null)
+		if(clazz == null){
 			return piMod.getTransferredItems();
-		
-		if(clazz.equals(SpawnChest.class))
+		}
+			
+		if(clazz.equals(SpawnChest.class)){
 			return spawnChest(piMod);
-		
-		if(clazz.equals(SpawnSign.class))
+		}
+			
+		if(clazz.equals(SpawnSign.class)){
 			return createSign(piMod);
+		}
 		
 		return null;
 	}
@@ -156,9 +159,12 @@ public class SpawnContainerController {
 	public boolean interactSign(Player player, Location location){
 		for(SpawnSign sign : signs){
 			if(sign.isAt(location)){
-				sign.interactSign(player);
-				signs.remove(sign);
-				return true;
+				if(sign.interactSign(player)){
+					signs.remove(sign);
+					return true;
+				}
+				
+				return false;
 			}
 		}
 		

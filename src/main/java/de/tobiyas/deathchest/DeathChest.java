@@ -10,25 +10,20 @@ package de.tobiyas.deathchest;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.ArrayList;
-import java.util.logging.Logger;
-
 import org.bukkit.plugin.PluginDescriptionFile;
 
 import de.tobiyas.deathchest.chestpositions.ChestContainer;
 import de.tobiyas.deathchest.chestpositions.ChestPackage;
+import de.tobiyas.deathchest.commands.CommandExecutor_DCHelp;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCPermCheck;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCPort;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCReload;
-import de.tobiyas.deathchest.commands.CommandExecutor_DCHelp;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCRemove;
 import de.tobiyas.deathchest.commands.CommandExecutor_DCVersion;
 import de.tobiyas.deathchest.commands.CommandExecutor_GYPort;
 import de.tobiyas.deathchest.commands.CommandExecutor_GYPos;
 import de.tobiyas.deathchest.config.ConfigManager;
-
+import de.tobiyas.deathchest.listeners.Listener_AfterPlayerDeath;
 import de.tobiyas.deathchest.listeners.Listener_Entity;
 import de.tobiyas.deathchest.listeners.Listener_Explosion;
 import de.tobiyas.deathchest.listeners.Listener_Sign;
@@ -37,20 +32,18 @@ import de.tobiyas.deathchest.util.BattleNightChecker;
 import de.tobiyas.deathchest.util.Const;
 import de.tobiyas.deathchest.util.PackageReloader;
 import de.tobiyas.deathchest.util.protection.ProtectionManager;
+import de.tobiyas.util.UtilsUsingPlugin;
 import de.tobiyas.util.metrics.SendMetrics;
-import de.tobiyas.util.permissions.PermissionManager;
 
 
 /**
  * @author tobiyas
  *
  */
-public class DeathChest extends JavaPlugin{
-	private Logger log;
+public class DeathChest extends UtilsUsingPlugin{
 	private PluginDescriptionFile description;
 	
 	private ConfigManager cManager;
-	private PermissionManager pManager;
 	
 	private ChestContainer cContainer;
 	private static DeathChest plugin;
@@ -59,27 +52,17 @@ public class DeathChest extends JavaPlugin{
 	private ProtectionManager protectionManager;
 	private BattleNightChecker bchecker;
 	
-	private String prefix;
-
-	
 	@Override
 	public void onEnable(){
 		plugin = this;
 		
-		log = Logger.getLogger("Minecraft");
 		description = getDescription();
-		prefix = "["+description.getName()+"] ";
 		
-		String versionInfo = description.getVersion();
-		String split[] = versionInfo.split("\\.");
-		
-		Const.currentVersion = Double.parseDouble(split[0]);
-		Const.currentBuildVersion = Integer.parseInt(split[1]);
+		writeVersion();
 		
 		if(!checkBukkitVersion()) Const.oldBukkitVersion = true;
 		
 		cManager = new ConfigManager();
-		initPermissionManager();
 		
 		cContainer = ChestPackage.createALLPackages();
 		spawnSignController = new SpawnContainerController();
@@ -91,7 +74,21 @@ public class DeathChest extends JavaPlugin{
 		protectionManager = new ProtectionManager();
 		SendMetrics.sendMetrics(this);
 
-		log(description.getFullName() + " fully loaded with " + pManager.getPermissionsName() + " hooked.");
+		log(description.getFullName() + " fully loaded with " + getPermissionManager().getPermissionsName() + " hooked.");
+	}
+	
+	
+	private void writeVersion(){
+		String versionInfo = description.getVersion();
+		String split[] = versionInfo.split("\\.");
+		
+		Const.currentVersion = Double.parseDouble(split[0]);
+		Const.currentBuildVersion = Integer.parseInt(split[1]);
+		if(split.length > 2){
+			Const.currentRevOfBuild = Integer.parseInt(split[2]);
+		}else{
+			Const.currentRevOfBuild = 1;
+		}
 	}
 	
 	/**
@@ -130,6 +127,11 @@ public class DeathChest extends JavaPlugin{
 		
 		Listener_Explosion listnerExplosion = new Listener_Explosion(this);
 		getServer().getPluginManager().registerEvents(listnerExplosion, this);
+
+		Listener_AfterPlayerDeath listnerAfterDeath = new Listener_AfterPlayerDeath(this);
+		getServer().getPluginManager().registerEvents(listnerAfterDeath, this);
+		
+		
 	}
 	
 	/**
@@ -155,21 +157,10 @@ public class DeathChest extends JavaPlugin{
 		}
 	}
 	
-	private void initPermissionManager(){
-		ArrayList<String> decline = new ArrayList<String>();
-		decline.add("bPermissions");
-		pManager = new PermissionManager(this, decline);
-	}
-	
 	@Override
 	public void onDisable(){
 		interactSpawnContainerController().saveAllSigns();		
 		log("disabled "+description.getFullName());
-	}
-	
-	
-	public void log(String message){
-		log.info(prefix+message);
 	}
 	
 
@@ -185,13 +176,6 @@ public class DeathChest extends JavaPlugin{
 	 */
 	public ConfigManager getConfigManager(){
 		return cManager;
-	}
-	
-	/**
-	 * @return the PermissionsManager
-	 */
-	public PermissionManager getPermissionsManager(){
-		return pManager;
 	}
 	
 	/**

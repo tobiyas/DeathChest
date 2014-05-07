@@ -35,6 +35,7 @@ public class Listener_Explosion implements Listener {
 				explode.blockList().remove(block);
 			}
 		}
+		
 	}
 	
 }
