@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -123,7 +122,7 @@ public class ChestPackage implements ChestContainer{
 	public static ChestContainer createALLPackages(){
 		InitStructure.checkAndInitPaths();
 		plugin = DeathChest.getPlugin();
-		allWorlds = new LinkedList<World>();
+		allWorlds = new LinkedList<String>();
 		
 		String pathPackages = plugin.getDataFolder() + File.separator + "packages.yml";
 		File filePackages = checkFile(pathPackages);

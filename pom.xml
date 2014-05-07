@@ -52,7 +52,7 @@
     	<artifactId>lwc</artifactId>
     	<version>4.1.1</version>
    		<scope>system</scope>
-    	<systemPath>D:/Dropbox/Workspace/Workspace-Minecraft/Libaries/Protection + edit/LWC.jar</systemPath>
+    	<systemPath>${basedir}/libs/LWC.jar</systemPath>
     	<optional>true</optional>
   	</dependency>
   	
@@ -61,7 +61,7 @@
     	<artifactId>lockette</artifactId>
     	<version>1.5</version> <!-- Don't know... -->
    		<scope>system</scope>
-    	<systemPath>D:/Dropbox/Workspace/Workspace-Minecraft/Libaries/Protection + edit/Lockette.jar</systemPath>
+    	<systemPath>${basedir}/libs/Lockette.jar</systemPath>
     	<optional>true</optional>
   	</dependency>
   	
@@ -70,7 +70,7 @@
     	<artifactId>battlenight</artifactId>
     	<version>1.4.7</version> <!-- Don't know... -->
    		<scope>system</scope>
-    	<systemPath>D:/Dropbox/Workspace/Workspace-Minecraft/Libaries/Misc/BattleNight.jar</systemPath>
+    	<systemPath>${basedir}/libs/BattleNight.jar</systemPath>
     	<optional>true</optional>
   	</dependency>
   	
@@ -79,7 +79,7 @@
     	<artifactId>SecureChests</artifactId>
     	<version>0.7.1</version> <!-- Don't know... -->
    		<scope>system</scope>
-    	<systemPath>D:/Dropbox/Workspace/Workspace-Minecraft/Libaries/Protection + edit/SecureChests.jar</systemPath>
+    	<systemPath>${basedir}/libs/SecureChests.jar</systemPath>
     	<optional>true</optional>
   	</dependency>
   </dependencies>
